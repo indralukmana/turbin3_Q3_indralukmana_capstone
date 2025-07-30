@@ -60,11 +60,10 @@ Recruiter], map out the key functions for each."
 * **Developer / Engineer / Hackathon Participant:**
   * Connect their wallet to the application.
   * Browse available learning decks.
-  * Stake SOL in a time-locked vault to start a commitment period.
+  * Stake SOL in a vault to start a commitment period.
   * Perform a daily on-chain "check-in" transaction to maintain their
         streak.
-  * Withdraw their SOL after the time-lock expires (if the streak was
-        maintained).
+  * Withdraw their SOL after the streak is complete.
   * Mint their NFT credential after a successful streak.
 * **Solana Dev Shop / Recruiter:**
   * View a developer's public profile.
@@ -78,7 +77,7 @@ user journey: Staking -> Daily Check-ins -> Withdrawal -> NFT Mint.
 
 **AI Prompt:**
 "Based on the critical user interaction of a developer staking SOL, performing
-daily on-chain check-ins for 30 days, withdrawing their SOL, and minting an
+daily on-chain check-ins for a pre-defined streak, withdrawing their SOL, and minting an
 NFT, what are the key technical requirements for a POC?"
 
 #### AI Output: Initial Technical Requirements
@@ -88,7 +87,7 @@ NFT, what are the key technical requirements for a POC?"
 * A frontend interface for learning (SRS) and for interacting with the
     on-chain programs.
 * An on-chain vault program with functions for:
-  * `stake(amount, duration)`: Locks user's SOL in a PDA.
+  * `stake(amount, streak)`: Locks user's SOL in a PDA.
   * `checkIn()`: Allows a user to record a daily transaction.
   * `withdraw()`: Allows a user to reclaim their SOL if conditions are met.
 * An on-chain NFT minter program with a function like `mintCredential()` that
@@ -113,9 +112,6 @@ This is a much stronger, more decentralized model. Key areas to refine:
     rely on Solana's slot or block timestamp, which can be manipulated. You
     need to define a day as a fixed number of slots and acknowledge this is an
     approximation.
-* **Slashing Mechanism:** What happens if a user misses a day? The requirements
-    don't define the penalty. You need a `slash()` function or similar logic
-    to handle broken streaks.
 * **NFT Minting Authority:** How does the NFT program know the user completed
     the streak? The vault program needs to grant a "mint token" (a specific
     on-chain receipt or PDA) that the NFT program can verify and consume.
@@ -126,14 +122,10 @@ The critique is excellent. The on-chain state and the interaction between the
 two programs are critical.
 
 * **Refined Requirement 1 (State):** The vault PDA will store: `user_pubkey`,
-    `stake_amount`, `start_timestamp`, `duration`, `last_check_in_timestamp`,
+    `stake_amount`, `start_timestamp`, `streak_target`, `last_check_in_timestamp`,
     and `streak_counter`.
 * **Refined Requirement 2 (Time):** A "day" will be defined as 86,400 slots
     (an approximation of 24 hours).
-* **Refined Requirement 3 (Slashing):** If a user calls `checkIn()` and
-    `current_slot > last_check_in_slot + 86400`, the streak is broken. A
-    portion of the stake is transferred to a treasury, and the remainder is
-    unlocked for withdrawal.
 * **Refined Requirement 4 (Mint Token):** Upon successful completion, the
     vault program will create a `MintPermit` PDA, which is owned by the user.
     The NFT program's `mintCredential()` function will require this `MintPermit`
@@ -149,7 +141,8 @@ two programs are critical.
   * **Before:** "User stakes SOL and starts learning."
   * **After:**
         1. "User selects a learning deck."
-        2. "User approves the transaction to stake SOL in a time-locked vault."
+        2. "User approves the transaction to stake SOL in a vault to begin a
+            study streak."
   * **Rationale:** Separated user choice from the on-chain action.
 
 * **Story 2:**
@@ -165,14 +158,14 @@ two programs are critical.
 
 ## Part D: Defining Potential On-Chain Requirements
 
-**User Story 1: User approves the transaction to stake SOL in a time-locked
-vault.**
+**User Story 1: User approves the transaction to stake SOL in a vault to
+begin a study streak.**
 
 * **Potential On-Chain Requirements:**
   * A `stake` function that accepts SOL from the user.
   * Creates a vault PDA seeded with the user's key and deck ID.
   * The PDA must store: `user_pubkey`, `stake_amount`, `start_timestamp`,
-        `duration`, `last_check_in_timestamp` (initialized to `start_timestamp`),
+        `streak_target`, `last_check_in_timestamp` (initialized to `start_timestamp`),
         and `streak_counter` (initialized to 1).
 
 **User Story 2: User performs a daily on-chain check-in.**
@@ -183,16 +176,13 @@ vault.**
         (e.g., `> last_check_in_timestamp + (24h - buffer)` and `< last_check_in_timestamp + (48h - buffer)`).
   * If the check-in is valid, it updates `last_check_in_timestamp` and
         increments `streak_counter`.
-  * If the check-in is late, it triggers a slashing mechanism.
 
-**User Story 3: After the commitment period ends, the user withdraws their
+**User Story 3: After the streak is complete, the user withdraws their
 staked SOL.**
 
 * **Potential On-Chain Requirements:**
   * A `withdraw` function that requires the user's vault PDA.
-  * It must verify that `current_timestamp > start_timestamp + duration`.
-  * It must verify that the `streak_counter` matches the `duration` (in
-        days).
+  * It must verify that the `streak_counter` matches the `streak_target`.
   * If conditions are met, it transfers the SOL from the PDA back to the
         user and closes the PDA account.
 

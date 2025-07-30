@@ -24,9 +24,9 @@ on-chain requirements for the Gamified SRS for Solana Developers project.
 
 - Connect a wallet to the application.
 - Browse and select a learning deck.
-- Stake SOL in a time-locked vault to begin a commitment period.
+- Stake SOL in a vault to begin a commitment period.
 - Perform a daily on-chain "check-in" to maintain their study streak.
-- Withdraw their staked SOL after the commitment period ends successfully.
+- Withdraw their staked SOL after the study streak is complete.
 - Mint a permissionless NFT credential as proof of their completed streak.
 
 ### Secondary Users (Solana Dev Shop / Recruiter)
@@ -43,14 +43,14 @@ on-chain requirements for the Gamified SRS for Solana Developers project.
 
 - **On-Chain Requirements:** None. This is an off-chain authentication action.
 
-### User Story 2: User approves the transaction to stake SOL in a time-locked vault
+### User Story 2: User approves the transaction to stake SOL in a vault to begin a study streak
 
 - **Potential On-Chain Requirements:**
   - A `stake` function on the vault program that accepts a SOL transfer.
   - It must create a vault PDA (Program Derived Address) seeded with the
     user's public key and a deck identifier.
   - The PDA must store the `user_pubkey`, `stake_amount`, `start_timestamp`,
-    a `duration` (e.g., 30 days), `last_check_in_timestamp`, and a
+    a `streak_target` (e.g., 30 days), `last_check_in_timestamp`, and a
     `streak_counter`.
 
 ### User Story 3: User performs a daily on-chain check-in
@@ -63,14 +63,11 @@ on-chain requirements for the Gamified SRS for Solana Developers project.
   - If the check-in is valid, it updates `last_check_in_timestamp` and
     increments the `streak_counter`.
 
-### User Story 4: After the commitment period ends, the user withdraws their staked SOL
+### User Story 4: After the study streak is complete, the user withdraws their staked SOL
 
 - **Potential On-Chain Requirements:**
   - A `withdraw` function on the vault program.
-  - Must verify that the current time is past the `start_timestamp` +
-    `duration`.
-  - Must verify that the `streak_counter` meets the requirement for the
-    full duration.
+  - Must verify that the `streak_counter` meets the `streak_target`.
   - If successful, it transfers the staked SOL from the vault PDA back to
     the user's wallet and closes the PDA account.
 

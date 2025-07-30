@@ -7,10 +7,10 @@ learning with light gamification (streaks, badges) to boost engagement.
 A unique, trustless architecture underpins the core features:
 
 1. **Self-Custodial Commitment Vault:** To enhance commitment, users stake SOL
-    into a smart contract that locks the funds for a fixed duration (e.g., 30
-    days). Users prove their commitment by performing a daily on-chain
-    "check-in." Successful completion of the daily streak unlocks their funds
-    for withdrawal.
+    into a smart contract. The vault requires users to perform a daily
+    on-chain "check-in" to build a study streak. The vault only unlocks the
+    funds for withdrawal after the user successfully completes a
+    pre-defined streak (e.g., a 30-day streak).
 2. **Permissionless NFT Credentials:** Upon successful completion of a
     commitment streak, the user is granted the ability to mint their own
     verifiable NFT credential directly from a permissionless on-chain program.
@@ -40,10 +40,11 @@ efficient, adaptable, and proven in technical fields.
 The platform is a lean, Solana-specific SRS that helps developers master
 essential skills through curated flashcards. Its key innovation is a
 **trustless, self-custodial commitment system**. Users stake SOL into a
-time-locked vault and must perform daily on-chain check-ins to unlock their
-funds, creating real economic incentives for consistency. Upon completion, they
-can mint a verifiable NFT credential from a permissionless program, offering
-true, user-owned proof of achievement.
+vault and must perform daily on-chain check-ins to build a study streak. The
+vault only unlocks their funds after the pre-defined streak is complete,
+creating real economic incentives for consistency. Upon completion, they can
+mint a verifiable NFT credential from a permissionless program, offering true,
+user-owned proof of achievement.
 
 **Pitch:** "Commit to mastering Solana. Our trustless SRS platform uses
 on-chain streaks to keep you accountable. Stake your SOL, complete your daily
@@ -64,8 +65,9 @@ themselves.
 
 1. **Efficient Mastery of Solana Skills:** Curated SRS decks accelerate
     retention of complex topics.
-2. **Trustless Commitment & Rewards:** The self-custodial, time-locked vault
-    provides a powerful, intrinsic incentive for daily engagement.
+2. **Trustless Commitment & Rewards:** The self-custodial vault, which
+    unlocks only after a completed study streak, provides a powerful,
+    intrinsic incentive for daily engagement.
 3. **Verifiable, User-Owned Credentials:** Permissionless NFT minting gives
     users true ownership over their proof of achievement.
 
@@ -112,7 +114,7 @@ space.
 ### Potential Weaknesses and Strengthening Strategies
 
 1. **Weakness: Smart Contract Complexity:** Designing a secure, trustless vault
-    with time-locks and daily check-ins is complex. **Strengthening:** Keep the
+    with daily check-ins and streak-based unlocking is complex. **Strengthening:** Keep the
     on-chain logic minimal and focused for the MVP. Rely on well-audited
     standards for the NFT minting process.
 2. **Weakness: User Experience (UX) for On-Chain Actions:** Daily check-ins

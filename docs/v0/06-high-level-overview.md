@@ -45,9 +45,11 @@ graph TD
 
     UserWallet([Learner's Wallet])
 
-    UserWallet -- "Calls stake(deck_id, ...)" --> P1
+    UserWallet -- "Calls stake(deck_id, streak_target, ...)" --> P1
     P1 -- "Creates/Manages a specific Vault PDA" --> PDA_1
     
+    UserWallet -- "Calls checkIn(deck_id)" --> P1
+
     UserWallet -- "Calls withdraw(deck_id)" --> P1
     P1 -- "Returns SOL & Closes a specific Vault PDA" --> PDA_2
 ```
