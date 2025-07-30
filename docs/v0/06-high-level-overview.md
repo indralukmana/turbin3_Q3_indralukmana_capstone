@@ -24,34 +24,51 @@ graph TD
 
 ## Vault Program
 
+### User-to-Vault Relationship
+
+A single user (wallet) can have multiple, independent vaults. Each vault is tied to a specific learning deck, allowing a user to have parallel commitments.
+
 ```mermaid
 graph TD
-    subgraph "On-Chain Logic"
-        direction TB
-        
-        P1[Vault Program]
-        
-      
-
-        subgraph  Multiple Vaults
-            PDA_1["Vault PDA (Deck 1)
-            user: LearnerX
-            deck_id: 1"]
-            PDA_2["Vault PDA (Deck 2)
-            user: LearnerX
-            deck_id: 2"]
-        end
-    end
-
     UserWallet([Learner's Wallet])
 
-    UserWallet -- "Calls stake(deck_id, streak_target, ...)" --> P1
-    P1 -- "Creates/Manages a specific Vault PDA" --> PDA_1
-    
-    UserWallet -- "Calls checkIn(deck_id)" --> P1
+    subgraph "Manages Multiple Vaults via Vault Program"
+        direction LR
+        VaultPDA1["Vault PDA (Deck 1)"]
+        VaultPDA2["Vault PDA (Deck 2)"]
+        VaultPDA_N["..."]
+    end
 
-    UserWallet -- "Calls withdraw(deck_id)" --> P1
-    P1 -- "Returns SOL & Closes a specific Vault PDA" --> PDA_2
+    UserWallet -- "stake(deck_id=1, ...)" --> VaultPDA1
+    UserWallet -- "stake(deck_id=2, ...)" --> VaultPDA2
+    UserWallet -- "checkIn(deck_id=1)" --> VaultPDA1
+    UserWallet -- "checkIn(deck_id=2)" --> VaultPDA2
+```
+
+### Lifecycle of a Single Vault
+
+Each vault has a distinct lifecycle, from creation to withdrawal.
+
+```mermaid
+graph TD
+    subgraph "Vault Program Lifecycle"
+        UserWallet([Learner's Wallet])
+        VaultProgram["Vault Program"]
+        VaultPDA["Vault PDA for Learner
+        - stake_amount
+        - streak_counter
+        - streak_target"]
+
+        UserWallet -- "stake(streak_target, ...)" --> VaultProgram
+        VaultProgram -- "Creates & Manages" --> VaultPDA
+        
+        UserWallet -- "checkIn()" --> VaultProgram
+        VaultProgram -- "Updates streak_counter" --> VaultPDA
+        
+        UserWallet -- "withdraw()" --> VaultProgram
+        VaultProgram -- "Verifies streak & Closes PDA" --> VaultPDA
+        VaultProgram -- "Returns SOL" --> UserWallet
+    end
 ```
 
 ### Vault Account State
