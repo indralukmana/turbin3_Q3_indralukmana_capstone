@@ -62,8 +62,6 @@ on-chain requirements for the Gamified SRS for Solana Developers project.
     spamming and allow for a grace period.
   - If the check-in is valid, it updates `last_check_in_timestamp` and
     increments the `streak_counter`.
-  - If the check-in is late (streak is broken), it must trigger a
-    "slashing" mechanism, where a portion of the stake is forfeited.
 
 ### User Story 4: After the commitment period ends, the user withdraws their staked SOL
 

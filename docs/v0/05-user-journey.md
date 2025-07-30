@@ -2,19 +2,18 @@
 
 ```mermaid
 journey
-    title Developer Learning Journey
+    title Study Commitment Journey
+    
+    section Commit SOL
+      Connect Wallet & Select Deck: 5: Learner
+      Approve SOL Deposit to Vault: 5: Learner
 
-    section Onboarding
-        Connect Wallet: 5: Developer
-        Select Deck: 5: Developer
-        Stake SOL in Vault: 5: Developer
+    section Study Period
+      Study SRS Flashcards (Off-Chain): 5: Learner
+      SOL remains locked in On-Chain Vault: 3: Vault Program
 
-    section Commitment
-        Deck Study: 5: Developer
-        Daily Check-in: 5: Developer
-
-    section Payout
-        Withdraw SOL: 5: Developer
-        Mint NFT Credential: 5: Developer
+    section Withdraw SOL
+      Initiate Withdrawal after time lock ends: 5: Learner
+      Receive SOL back in Wallet: 5: Learner
 
 ```

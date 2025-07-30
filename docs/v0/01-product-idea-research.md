@@ -364,36 +364,36 @@ and hackathon participants (18-35, building dApps for Solana Summer).
 
 #### Why This May Not Be a True Blue Ocean
 
-1.  **Crowded Niche:** The Solana learning space isn't empty--it's filled with
+1. **Crowded Niche:** The Solana learning space isn't empty--it's filled with
     free, established tools (Anki, Solana Docs) and Web3 platforms
     (HackQuest, Buildspace). Your SRS + NFTs + streaks combo isn't radically
     different; it's an incremental improvement at best. Solana devs already
     have solutions--your platform must be 10x better to disrupt, which is
     unlikely given your Rust inexperience and solo constraints.
-2.  **High Switching Costs:** Solana Builder devs, freelancers, and
+2. **High Switching Costs:** Solana Builder devs, freelancers, and
     hackathoners are invested in existing workflows (Anki decks, Solana Docs,
     YouTube). Convincing them to adopt your unproven MVP requires exceptional
     UX and proven outcomes, which your 6-12 week timeline may not deliver. A
     2024 EdTech Review study shows 60% of technical learners stick with
     familiar tools unless new ones offer clear, immediate value.
-3.  **NFT Dependency:** Your NFT credentials assume ecosystem recognition
+3. **NFT Dependency:** Your NFT credentials assume ecosystem recognition
     (e.g., Phantom or Marinade valuing them), but without partnerships,
     they're speculative. Most Solana NFTs in 2025 have minimal utility (90%
     lack secondary market value), making your "verified credentials" a risky
     bet, not a game-changer.
-4.  **Niche Scale Limits:** Your target market (~2,000-5,000 Solana devs
+4. **Niche Scale Limits:** Your target market (~2,000-5,000 Solana devs
     globally in 2025, per ecosystem estimates) is tiny, limiting scalability.
     A true blue ocean creates broad, untapped demand; your project serves a
     hyper-specialized group already using free tools like Anki or Solana
     Docs. Even if you nail the MVP, its impact may be too narrow to disrupt
     the market or impress Solana job recruiters.
-5.  **Execution Risks:** As a solo dev new to Rust/Anchor, your ability to
+5. **Execution Risks:** As a solo dev new to Rust/Anchor, your ability to
     deliver a polished SRS with accurate Solana content and functional
     Metaplex NFTs in 6-12 weeks is questionable. A true blue ocean requires
     flawless execution to redefine the market, but your inexperience risks a
     buggy demo that fails to stand out against competitors' proven
     reliability.
-6.  **Skeptical Note:** Your project feels like a crowded "red ocean"
+6. **Skeptical Note:** Your project feels like a crowded "red ocean"
     tweak--combining SRS (Anki), Web3 credentials (HackQuest), and
     gamification (Duolingo)--rather than a revolutionary new space. Without
     validated demand or ecosystem-backed NFTs, it's fighting for scraps in a
@@ -401,51 +401,51 @@ and hackathon participants (18-35, building dApps for Solana Summer).
 
 #### Overlooked Competitors
 
-1.  **YouTube Tutorials and Solana Community Content:**
-    -   **Overview:** YouTube channels (e.g., Solana Foundation, Figment) and
+1. **YouTube Tutorials and Solana Community Content:**
+    - **Overview:** YouTube channels (e.g., Solana Foundation, Figment) and
         community-driven content on X, Discord, or Solana StackExchange offer
         free, accessible tutorials on Rust, Anchor, SPL tokens, and Metaplex.
         These include code walkthroughs, AMAs, and crowd-sourced Q&A.
-    -   **Relevance:** Solana Builder devs, freelancers, and hackathoners rely
+    - **Relevance:** Solana Builder devs, freelancers, and hackathoners rely
         on these for quick, practical learning. They're free, up-to-date, and
         community-vetted, appealing to your audience's need for fast, relevant
         insights.
-    -   **Weaknesses:** No SRS structure for retention, fragmented content (not
+    - **Weaknesses:** No SRS structure for retention, fragmented content (not
         curated), and no credentials. However, their accessibility and
         real-time updates (e.g., X threads on Metaplex updates) make them hard
         to beat.
-    -   **Why Overlooked:** You focused on structured platforms (Anki,
+    - **Why Overlooked:** You focused on structured platforms (Anki,
         HackQuest) but underestimated the power of informal, community-driven
         learning. Solana's active Discord/X communities provide near-real-time
         solutions, reducing the need for a dedicated SRS.
-2.  **Web3 Coding Bootcamps (e.g., Encode Club, ChainShot):**
-    -   **Overview:** Web3 bootcamps like Encode Club and ChainShot offer
+2. **Web3 Coding Bootcamps (e.g., Encode Club, ChainShot):**
+    - **Overview:** Web3 bootcamps like Encode Club and ChainShot offer
         intensive Solana-focused courses, teaching Rust, Anchor, and SPL tokens
         through live coding and projects. They often include certificates or
         portfolio pieces for job seekers.
-    -   **Relevance:** Freelance and hackathon devs use these for structured
+    - **Relevance:** Freelance and hackathon devs use these for structured
         learning and job-ready skills, directly competing with your SRS and NFT
         credentials. Builder program devs may also join for capstone prep.
-    -   **Weaknesses:** High cost (e.g., $1,000-$3,000 for bootcamps),
+    - **Weaknesses:** High cost (e.g., $1,000-$3,000 for bootcamps),
         time-intensive (4-8 weeks), and no SRS focus. Certificates aren't
         blockchain-based, but they're often recognized by Web3 employers.
-    -   **Why Overlooked:** Your analysis missed these premium, job-oriented
+    - **Why Overlooked:** Your analysis missed these premium, job-oriented
         programs that overlap with your NFT credential pitch. Their established
         reputation and alumni networks (e.g., Encode's Solana partnerships)
         could outshine your unproven NFTs.
-3.  **Open-Source Solana Repositories and Tools:**
-    -   **Overview:** Open-source repos like Solana Program Library (SPL),
+3. **Open-Source Solana Repositories and Tools:**
+    - **Overview:** Open-source repos like Solana Program Library (SPL),
         Anchor examples, and Metaplex GitHub tutorials provide hands-on code
         samples and documentation for learning Solana's stack. Tools like
         Solana CLI and Rust Analyzer aid practical learning.
-    -   **Relevance:** Builder and hackathon devs lean on these for real-world
+    - **Relevance:** Builder and hackathon devs lean on these for real-world
         coding practice, while freelancers use them to build portfolio dApps.
         They're free and authoritative, directly competing with your SRS
         content.
-    -   **Weaknesses:** No SRS or gamification, and they require self-discipline
+    - **Weaknesses:** No SRS or gamification, and they require self-discipline
         to navigate. They lack formal credentials, but their practical focus
         aligns with your audience's job goals.
-    -   **Why Overlooked:** You didn't account for the hands-on, code-first
+    - **Why Overlooked:** You didn't account for the hands-on, code-first
         learning style of Solana devs, who often prefer GitHub repos over
         structured platforms. These resources are free and ecosystem-endorsed,
         making your SRS less essential.
@@ -456,7 +456,7 @@ Your project isn't a blue ocean--it's a red ocean bloodbath. You're swimming
 with sharks like Anki's free flexibility, Solana Docs' authority, HackQuest's
 Web3 credentials, and Buildspace's community clout, plus overlooked
 YouTube/Discord communities, Web3 bootcamps, and open-source repos. Your SRS
-+ NFTs + streaks pitch doesn't carve out uncontested space; it's a niche
+- NFTs + streaks pitch doesn't carve out uncontested space; it's a niche
 tweak fighting for a tiny market (~2,000-5,000 devs). As a solo Web2 dev new
 to Rust/Solana, your MVP risks being a buggy, unvalidated product that fails
 to outshine free, proven alternatives. Without Solana ecosystem buy-in for
