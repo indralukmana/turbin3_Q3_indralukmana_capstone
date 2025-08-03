@@ -21,13 +21,14 @@ N/A (Custom Anchor programs for Solana)
 
 ### 2.1. Technical Summary
 
-The system architecture for the "Proof of Discipline" MVP is based on two core Solana Anchor programs: `srs_vault` and `nft-minter`. These programs are designed to
-be stateless logic handlers that interact with Program Derived Addresses (PDAs)
-to store user-specific commitment data and temporary mint permits. The
-architecture leverages Solana's `Clock::unix_timestamp` for time-based logic and
-Cross-Program Invocation (CPI) for secure inter-program communication to mint
-NFT credentials. The design emphasizes security, simplicity, and testability
-using `litesvm`.
+The system architecture for the "Proof of Discipline" MVP is based on two core
+Solana Anchor programs: `srs_vault` and `nft-minter`. These programs are
+designed to be stateless logic handlers that interact with Program Derived
+Addresses (PDAs) to store user-specific commitment data and temporary mint
+permits. The architecture leverages Solana's `Clock::unix_timestamp` for
+time-based logic and Cross-Program Invocation (CPI) for secure inter-program
+communication to mint NFT credentials. The design emphasizes security,
+simplicity, and testability using `litesvm`.
 
 ### 2.2. High Level Overview
 
@@ -179,9 +180,9 @@ successful completion, it issues a MintPermit via CPI.
 
 **Key Interfaces:**
 
-- `initialize(deck_id: String, initial_deposit_amount: u64, streak_target: u8)` - Initializes a
-  new Vault PDA, seeded by the `user`'s public key and the `deck_id`, and
-  transfers SOL.
+- `initialize(deck_id: String, initial_deposit_amount: u64, streak_target: u8)` -
+  Initializes a new Vault PDA, seeded by the `user`'s public key and the
+  `deck_id`, and transfers SOL.
 - `check_in()` - Verifies time window and updates streak.
 - `withdraw()` - Verifies streak completion, transfers SOL back, closes Vault
   PDA, and performs CPI to `nft-minter` to create MintPermit.
@@ -307,14 +308,14 @@ capstone/
 │   │
 ├── tests/
 │   ├── unit/                       # Unit tests using litesvm and vitest
-│   │   ├── vault.test.ts           # Unit tests for vault program logic
-│   │   └── nft-minter.test.ts      # Unit tests for nft-minter program logic
+│   │   ├── initialize.test.ts      # Tests for the initialize instruction
+│   │   ├── check-in.test.ts        # Tests for the check-in instruction
+│   │   └── withdraw.test.ts        # Tests for the withdraw instruction
 │   ├── integration/                # Integration tests using litesvm and vitest
-│   │   ├── vault.test.ts           # Integration tests for vault program logic (time travel, check-in windows)
-│   │   └── nft-minter.test.ts      # Integration tests for nft-minter program logic (CPI interaction)
+│   │   └── vault.test.ts           # Integration tests for vault program logic (time travel, check-in windows)
 │   └── e2e/                        # End-to-end tests using solana-web3 and vitest
-│       ├── vault.test.ts           # E2E tests for vault program logic
-│       └── nft-minter.test.ts      # E2E tests for nft-minter program logic
+│       └── vault.test.ts           # E2E tests for vault program logic
+│   └── helpers.ts                  # Common test helper functions
 │
 ├── client/                         # (Optional) Simple scripts/CLI to interact with programs for MVP demo
 │   └── ...
