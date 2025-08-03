@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "types": [],
+    "typeRoots": ["./node_modules/@types"],
+    "lib": ["es2015"],
+    "module": "preserve",
+    "target": "esnext",
+    "esModuleInterop": true,
+    "strictNullChecks": true,
+    "moduleResolution": "bundler",
+    "incremental": true, // Enable incremental compilation for faster builds
+    "tsBuildInfoFile": "./.cache/.tsbuildinfo"
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist", "build"]
+}

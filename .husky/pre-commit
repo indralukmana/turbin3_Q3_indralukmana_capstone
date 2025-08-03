@@ -1,0 +1,16 @@
+echo "Running lint-staged..."
+pnpx lint-staged
+
+if [ $? -ne 0 ]; then
+  echo "lint-staged failed. Aborting commit."
+  exit 1
+fi
+
+echo "Running TypeScript typecheck..."
+pnpm run typecheck
+if [ $? -ne 0 ]; then
+  echo "TypeScript typecheck failed. Aborting commit."
+  exit 1
+fi
+
+echo "Pre-commit hooks passed successfully."
