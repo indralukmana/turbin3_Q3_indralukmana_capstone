@@ -3,7 +3,7 @@
 ```mermaid
 journey
     title Study Commitment Journey
-    
+
     section Commit SOL
       Connect Wallet & Select Deck: 5: Learner
       Approve SOL Deposit to Vault: 5: Learner
