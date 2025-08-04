@@ -8,7 +8,8 @@ const config: FlatXoConfig = {
     'unicorn/no-array-reduce': 'off',
     'unicorn/prevent-abbreviations': 'off',
     'capitalized-comments': 'off',
-    'import-x/extensions': 'off'
+    'import-x/extensions': 'off',
+    'no-implicit-coercion': 'off'
   },
 };
 
