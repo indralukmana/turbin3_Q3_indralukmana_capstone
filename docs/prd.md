@@ -1,4 +1,6 @@
-# Gamified SRS for Solana Developers - Proof of Discipline Product Requirements Document (PRD)
+# Gamified SRS for Solana Developers - Proof of Discipline
+
+Product Requirement Document (PRD)
 
 ## Section 1: Goals and Background Context
 
@@ -110,11 +112,14 @@ for the Anchor programs.
    clearly defined and reproducible.
 10. **NFR10:** The Anchor programs MUST be deployed to the Solana Devnet for the
     POC MVP.
-11. **NFR11:** Program testing SHALL be conducted exclusively using `litesvm`
-    for accurate simulation of time-based logic and program interactions. Local
-    development and testing will rely on `litesvm`.
-12. **NFR12:** Final end-to-end validation SHALL be performed using `litesvm`
-    for detailed testing and on Devnet for a real network environment.
+11. **NFR11:** Program testing SHALL be conducted using Anchor's built-in
+    testing framework for core functionality validation. Due to limitations in
+    time manipulation within this framework, comprehensive testing of time-based
+    logic (e.g., precise check-in windows) will be deferred to a future phase.
+    Local development and testing will rely on this framework.
+12. **NFR12:** Final end-to-end validation SHALL be performed using Anchor's
+    built-in testing framework for detailed testing and on Devnet for a real
+    network environment.
 
 ## Section 3: User Interface Design Goals
 
@@ -171,16 +176,19 @@ independently, even within the monorepo structure.
 
 ### Testing & Development Environment
 
-Full Testing Pyramid (for the Anchor Programs) using `litesvm`.
+Full Testing Pyramid (for the Anchor Programs) using Anchor's built-in testing
+framework.
 
 - **Unit Tests:** For individual functions and instruction handlers within the
-  Anchor programs, leveraging `litesvm` for accurate time simulation.
+  Anchor programs, leveraging the framework for core functionality testing. Note
+  that precise time simulation for check-in windows will be deferred.
 - **Integration Tests:** For testing the interaction between program
   instructions, account state changes, and the flow between the `vault` and
-  `nft-minter` programs, using `litesvm`.
+  `nft-minter` programs, using the framework. Time-based logic testing will be
+  deferred.
 - **End-to-End Tests:** Scripts demonstrating the full user flow (Initialize ->
   Check-in(s) -> Withdraw -> Mint NFT) will be developed and run locally using
-  `litesvm`. Final validation will also occur on Devnet.
+  the framework. Final validation will also occur on Devnet.
 
 ### Additional Technical Assumptions and Requests
 
@@ -202,8 +210,11 @@ Full Testing Pyramid (for the Anchor Programs) using `litesvm`.
 - **Metaplex Integration:** The NFT minting will use standard Metaplex libraries
   (like `mpl-token-metadata`) for creating the credential NFTs.
 - **Development & Testing Environment:** Development and testing will be
-  conducted exclusively using `litesvm` for its superior testing capabilities
-  for time-sensitive logic. The final MVP will be deployed to Solana Devnet.
+  conducted using Anchor's built-in testing framework for its simplicity and
+  robustness. While this framework is excellent for testing core functionality,
+  it has limitations in time manipulation. Therefore, comprehensive testing of
+  time-sensitive logic (e.g., precise check-in window validation) will be
+  deferred to a later phase. The final MVP will be deployed to Solana Devnet.
 
 ## Section 5: Epics and Stories
 
@@ -321,7 +332,8 @@ components and logic paths are verified for correctness.
 - **AC 2.1.1:** Unit tests SHALL cover the `initialize` instruction, verifying
   account initialization, SOL transfer, and state setup under normal conditions.
 - **AC 2.1.2:** Unit tests SHALL cover the `check_in` instruction, verifying the
-  time window logic for valid and invalid check-ins using `litesvm`.
+  basic logic for valid and invalid check-ins. Note: Precise time window testing
+  is deferred.
 - **AC 2.1.3:** Unit tests SHALL cover the `withdraw` instruction, verifying the
   streak validation logic for both successful and failed withdrawal attempts.
 - **AC 2.1.4:** Unit tests SHALL aim for high line coverage (e.g., >90%) for the
@@ -337,8 +349,8 @@ programs, so that the interaction between programs and the end-to-end flow are
 verified.
 
 - **AC 2.2.1:** Integration tests SHALL simulate the full user journey:
-  `initialize` -> `check_in`(s) -> `withdraw`, using `litesvm` for accurate time
-  simulation.
+  `initialize` -> `check_in`(s) -> `withdraw`, verifying core state transitions.
+  Note: Precise time simulation is deferred.
 - **AC 2.2.2:** Integration tests SHALL verify that the `MintPermit` PDA is
   correctly created by the `vault` program during a successful withdrawal,
   including the `deck_id` and timestamp.
@@ -364,7 +376,8 @@ architecture, usage, and deployment are clear for future development and users.
 - **AC 2.3.3:** Documentation SHALL explain the inter-program communication
   mechanism (CPI for Mint Permit creation).
 - **AC 2.3.4:** Documentation SHALL provide clear instructions for building,
-  testing (exclusively with `litesvm`), and deploying the programs to Devnet.
+  testing (using Anchor's built-in testing framework, with a note about deferred
+  time-based testing), and deploying the programs to Devnet.
 - **AC 2.3.5:** Documentation SHALL include example code snippets or scripts
   demonstrating how to interact with the programs.
 - **AC 2.3.6:** Documentation SHALL discuss potential future improvements like

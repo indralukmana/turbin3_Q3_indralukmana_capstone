@@ -28,7 +28,7 @@ Addresses (PDAs) to store user-specific commitment data and temporary mint
 permits. The architecture leverages Solana's `Clock::unix_timestamp` for
 time-based logic and Cross-Program Invocation (CPI) for secure inter-program
 communication to mint NFT credentials. The design emphasizes security,
-simplicity, and testability using `litesvm`.
+simplicity, and testability using Anchor's built-in testing framework.
 
 ### 2.2. High Level Overview
 
@@ -105,18 +105,18 @@ N/A (Fully On-Chain, Solana Devnet for MVP)
 
 ### 3.2. Technology Stack Table
 
-| Category         | Technology                      | Version           | Purpose                                   | Rationale                                                                   |
-| ---------------- | ------------------------------- | ----------------- | ----------------------------------------- | --------------------------------------------------------------------------- |
-| **Language**     | Rust                            | 1.89.0+           | Primary development language for programs | Required by Anchor framework, suitable for Solana's performance needs.      |
-| **Framework**    | Anchor                          | 0.31.1            | Solana program framework                  | Standard framework for building secure Solana programs, simplifies PDA/CPI. |
-| **SDK**          | Solana Program Library (SPL)    | latest            | Core Solana account types and helpers     | Essential for interacting with native Solana concepts.                      |
-| **NFT Standard** | Metaplex (`mpl-token-metadata`) | 5.1.0             | NFT minting and metadata standard         | The de facto standard for NFTs on Solana, ensures compatibility.            |
-| **Testing**      | `litesvm`                       | 0.6.1             | Solana program simulator (TypeScript)     | Required by PRD for accurate time simulation and testing.                   |
-| **Testing**      | `@solana/web3.js`               | 1.98.4            | Solana JS SDK                             | For interacting with programs and E2E tests.                                |
-| **Testing**      | `@coral-xyz/anchor`             | 0.31.1            | Anchor TS client                          | For simplified interaction with Anchor programs in tests.                   |
-| **Testing**      | `vitest`                        | 3.2.4             | Test runner                               | For running unit, integration, and E2E tests.                               |
-| **Deployment**   | `solana-cli`                    | 2.3.7+            | Deployment and interaction tool           | Standard tool for deploying programs to Solana clusters.                    |
-| **Build**        | `cargo` (Rust)                  | Bundled with Rust | Build tool for Rust projects              | Standard Rust build system.                                                 |
+| Category         | Technology                          | Version           | Purpose                                   | Rationale                                                                                                                                                                                                |
+| ---------------- | ----------------------------------- | ----------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Language**     | Rust                                | 1.89.0+           | Primary development language for programs | Required by Anchor framework, suitable for Solana's performance needs.                                                                                                                                   |
+| **Framework**    | Anchor                              | 0.31.1            | Solana program framework                  | Standard framework for building secure Solana programs, simplifies PDA/CPI.                                                                                                                              |
+| **SDK**          | Solana Program Library (SPL)        | latest            | Core Solana account types and helpers     | Essential for interacting with native Solana concepts.                                                                                                                                                   |
+| **NFT Standard** | Metaplex (`mpl-token-metadata`)     | 5.1.0             | NFT minting and metadata standard         | The de facto standard for NFTs on Solana, ensures compatibility.                                                                                                                                         |
+| **Testing**      | Anchor's built-in testing framework | latest            | Solana program testing framework          | Provides a robust and straightforward testing environment using the Solana test validator. Time manipulation capabilities are limited compared to litesvm, so time-based logic testing will be deferred. |
+| **Testing**      | `@solana/web3.js`                   | 1.98.4            | Solana JS SDK                             | For interacting with programs and E2E tests.                                                                                                                                                             |
+| **Testing**      | `@coral-xyz/anchor`                 | 0.31.1            | Anchor TS client                          | For simplified interaction with Anchor programs in tests.                                                                                                                                                |
+| **Testing**      | `vitest`                            | 3.2.4             | Test runner                               | For running unit, integration, and E2E tests.                                                                                                                                                            |
+| **Deployment**   | `solana-cli`                        | 2.3.7+            | Deployment and interaction tool           | Standard tool for deploying programs to Solana clusters.                                                                                                                                                 |
+| **Build**        | `cargo` (Rust)                      | Bundled with Rust | Build tool for Rust projects              | Standard Rust build system.                                                                                                                                                                              |
 
 ## Section 4: Data Models
 

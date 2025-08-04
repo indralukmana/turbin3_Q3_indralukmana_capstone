@@ -160,6 +160,15 @@ timeframe. A clear demonstration script must validate the end-to-end flow:
 Initialize -> Check-in(s) -> Withdraw SOL -> Mint NFT. Success is measured by
 the technical excellence and completeness of this core on-chain component.
 
+**Testing Approach Update:** The testing strategy will utilize Anchor's built-in
+testing framework, which leverages the Solana test validator. This approach
+simplifies the testing setup compared to alternatives. While this framework is
+robust for testing core functionality, it does not natively support manipulating
+blockchain time. Therefore, comprehensive testing of time-based logic (e.g.,
+precise check-in window validation) will be deferred to a future phase. The
+current focus will be on ensuring the core state transitions (Initialize,
+Check-in, Withdraw, Mint NFT) are correct under standard conditions.
+
 ## Post-MVP Vision (Full Product)
 
 ### Phase 2 Features (Integrating the Core)
