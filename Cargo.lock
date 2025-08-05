@@ -756,6 +756,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "nft-minter"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+]
+
+[[package]]
 name = "num-bigint"
 version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1910,6 +1917,7 @@ name = "srs_vault"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
+ "nft-minter",
 ]
 
 [[package]]

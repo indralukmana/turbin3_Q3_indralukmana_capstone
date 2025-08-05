@@ -26,4 +26,8 @@ pub mod srs_vault {
     pub fn check_in(ctx: Context<CheckIn>) -> Result<()> {
         check_in_handler(ctx)
     }
+
+    pub fn withdraw(ctx: Context<Withdraw>) -> Result<()> {
+        withdraw_handler(ctx)
+    }
 }
