@@ -1,59 +1,15 @@
 import {Buffer} from 'node:buffer'
 import { describe, it, expect, assert } from 'vitest';
-import {
-  AnchorProvider,
-  type Program,
-  setProvider,
-  workspace,
-  web3,
-  BN,
-} from '@coral-xyz/anchor';
-import {  type SrsVault as Vault } from '../target/types/srs_vault';
+import { web3, BN  } from '@coral-xyz/anchor';
+import { setupTest, airdropSol, initializeVault } from '../helpers';
 
 describe('vault', () => {
-  // Configure the client to use the local cluster.
-  setProvider(AnchorProvider.env());
-  const provider = AnchorProvider.env();
-
-  const program = workspace.srs_vault as Program<Vault>;
+  const program = setupTest();
   const vaultAuthority = web3.Keypair.generate();
-
-  // Helper function to initialize a vault
-  const initializeVault = async (
-    deckId: string,
-    initialDepositAmount: BN,
-    streakTarget: number,
-    authority: web3.Keypair,
-  ) => {
-    const [vaultPda] = web3.PublicKey.findProgramAddressSync(
-      [
-        Buffer.from('vault'),
-        authority.publicKey.toBuffer(),
-        Buffer.from(deckId),
-      ],
-      program.programId,
-    );
-
-    await program.methods
-      .initialize(deckId, initialDepositAmount, streakTarget)
-      .accountsPartial({
-        vaultAuthority: authority.publicKey,
-        vault: vaultPda,
-        systemProgram: web3.SystemProgram.programId,
-      })
-      .signers([authority])
-      .rpc();
-
-    return program.account.vault.fetch(vaultPda);
-  };
 
   it('Initializes the vault account correctly', async () => {
     // Airdrop SOL to the vault authority to pay for transactions
-    const tx = await provider.connection.requestAirdrop(
-      vaultAuthority.publicKey,
-      10 * web3.LAMPORTS_PER_SOL,
-    );
-    await provider.connection.confirmTransaction({ signature: tx, ...(await provider.connection.getLatestBlockhash()) });
+    await airdropSol(program.provider , vaultAuthority.publicKey, 10 * web3.LAMPORTS_PER_SOL);
 
     // Define test parameters
     const deckId = 'my_first_deck';
@@ -62,10 +18,11 @@ describe('vault', () => {
 
     // Initialize the vault
     const vaultAccount = await initializeVault(
+      program,
       deckId,
-      initialDepositAmount,
-      streakTarget,
-      vaultAuthority,
+      {initialDepositAmount,
+        streakTarget,
+        vaultAuthority}
     );
 
     // Perform assertions to verify the state
@@ -110,7 +67,7 @@ describe('vault', () => {
       ],
       program.programId,
     );
-    const vaultBalance = await provider.connection.getBalance(vaultPda);
+    const vaultBalance = await (program.provider).connection.getBalance(vaultPda);
     expect(vaultBalance).to.be.gte(
       initialDepositAmount.toNumber(),
       'Vault balance is less than the initial deposit',
@@ -123,10 +80,11 @@ describe('vault', () => {
     const streakTarget = 10;
 
     const vaultAccount = await initializeVault(
+      program,
       deckId,
-      initialDepositAmount,
-      streakTarget,
-      vaultAuthority,
+      { initialDepositAmount,
+        streakTarget,
+        vaultAuthority,}
     );
 
     assert.ok(
@@ -142,7 +100,7 @@ describe('vault', () => {
       ],
       program.programId,
     );
-    const vaultBalance = await provider.connection.getBalance(vaultPda);
+    const vaultBalance = await (program.provider).connection.getBalance(vaultPda);
     // Rent exemption is still required
     expect(vaultBalance).to.be.greaterThan(0);
   });
@@ -154,17 +112,14 @@ describe('vault', () => {
     const streakTarget = 20;
 
     // Airdrop more SOL to handle the large deposit
-    const tx = await provider.connection.requestAirdrop(
-      vaultAuthority.publicKey,
-      101 * web3.LAMPORTS_PER_SOL,
-    );
-    await provider.connection.confirmTransaction({ signature: tx, ...(await provider.connection.getLatestBlockhash()) });
+    await airdropSol(program.provider, vaultAuthority.publicKey, 101 * web3.LAMPORTS_PER_SOL);
 
     const vaultAccount = await initializeVault(
+      program,
       deckId,
-      initialDepositAmount,
-      streakTarget,
-      vaultAuthority,
+      {initialDepositAmount,
+        streakTarget,
+        vaultAuthority,}
     );
 
     assert.ok(
@@ -180,7 +135,7 @@ describe('vault', () => {
       ],
       program.programId,
     );
-    const vaultBalance = await provider.connection.getBalance(vaultPda);
+    const vaultBalance = await (program.provider).connection.getBalance(vaultPda);
     expect(vaultBalance).to.be.gte(initialDepositAmount.toNumber());
   });
 });
