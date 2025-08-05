@@ -70,3 +70,34 @@ export async function initializeVault(
 
   return program.account.vault.fetch(vaultPda);
 }
+
+/**
+ * Performs a check-in for a vault.
+ * @param program The Anchor program instance.
+ * @param vaultAuthority The authority keypair.
+ * @param deckId The deck ID.
+ * @returns The transaction signature.
+ */
+export async function checkIn(
+  program: Program<SrsVault>,
+  vaultAuthority: web3.Keypair,
+  deckId: string,
+) {
+  const [vaultPda] = web3.PublicKey.findProgramAddressSync(
+    [
+      Buffer.from('vault'),
+      vaultAuthority.publicKey.toBuffer(),
+      Buffer.from(deckId),
+    ],
+    program.programId,
+  );
+
+  return program.methods
+    .checkIn()
+    .accounts({
+      user: vaultAuthority.publicKey,
+      vault: vaultPda,
+    })
+    .signers([vaultAuthority])
+    .rpc();
+}

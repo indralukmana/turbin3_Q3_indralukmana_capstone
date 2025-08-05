@@ -22,4 +22,8 @@ pub mod srs_vault {
     ) -> Result<()> {
         initialize_vault(ctx, deck_id, initial_deposit_amount, streak_target)
     }
+
+    pub fn check_in(ctx: Context<CheckIn>) -> Result<()> {
+        check_in_handler(ctx)
+    }
 }
