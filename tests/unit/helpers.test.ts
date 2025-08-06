@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { web3, BN  } from '@coral-xyz/anchor';
-import { setupTest, airdropSol } from '../helpers';
+import { web3 } from '@coral-xyz/anchor';
+import { describe, expect, it } from 'vitest';
+import { airdropSol, setupTest } from '../helpers';
 
 describe('helpers', () => {
   it('should airdrop SOL to a specified public key', async () => {

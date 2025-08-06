@@ -1,7 +1,7 @@
-import {Buffer} from 'node:buffer'
-import { describe, it, expect, assert } from 'vitest';
-import { web3, BN  } from '@coral-xyz/anchor';
-import { setupTest, airdropSol, initializeVault } from '../helpers';
+import { Buffer } from 'node:buffer';
+import { BN, web3 } from '@coral-xyz/anchor';
+import { assert, describe, expect, it } from 'vitest';
+import { airdropSol, initializeVault, setupTest } from '../helpers';
 
 describe('vault', () => {
   const program = setupTest();

@@ -1,8 +1,6 @@
-import {Buffer} from 'node:buffer'
-import { describe, it, expect, assert } from 'vitest';
-import { web3, BN, type Program } from '@coral-xyz/anchor';
-import { setupTest, airdropSol, initializeVault, checkIn } from '../helpers';
-import { type SrsVault } from '../../target/types/srs_vault';
+import { BN, web3 } from '@coral-xyz/anchor';
+import { assert, describe, it } from 'vitest';
+import { airdropSol, checkIn, initializeVault, setupTest } from '../helpers';
 
 /*
  * NOTE: These are placeholder tests due to limitations in the current testing framework.
@@ -24,13 +22,18 @@ import { type SrsVault } from '../../target/types/srs_vault';
  * - Proper timestamp updates
  */
 
+
 describe('check-in (placeholder tests)', () => {
   const program = setupTest();
   const vaultAuthority = web3.Keypair.generate();
 
   it('Rejects a check-in that is too early (immediately after initialization)', async () => {
     // Airdrop SOL to the vault authority to pay for transactions
-    await airdropSol(program.provider, vaultAuthority.publicKey, 10 * web3.LAMPORTS_PER_SOL);
+    await airdropSol(
+      program.provider,
+      vaultAuthority.publicKey,
+      10 * web3.LAMPORTS_PER_SOL
+    );
 
     // Define test parameters
     const deckId = 'early_check_in_deck';
@@ -38,15 +41,11 @@ describe('check-in (placeholder tests)', () => {
     const streakTarget = 5;
 
     // Initialize the vault
-    await initializeVault(
-      program,
-      deckId,
-      {
-        initialDepositAmount,
-        streakTarget,
-        vaultAuthority
-      }
-    );
+    await initializeVault(program, deckId, {
+      initialDepositAmount,
+      streakTarget,
+      vaultAuthority,
+    });
 
     // Attempt a check-in immediately after initialization (should be too early)
     try {
@@ -63,7 +62,11 @@ describe('check-in (placeholder tests)', () => {
 
   it('Attempts a check-in (time-based validation deferred)', async () => {
     // Airdrop SOL to the vault authority to pay for transactions
-    await airdropSol(program.provider, vaultAuthority.publicKey, 10 * web3.LAMPORTS_PER_SOL);
+    await airdropSol(
+      program.provider,
+      vaultAuthority.publicKey,
+      10 * web3.LAMPORTS_PER_SOL
+    );
 
     // Define test parameters
     const deckId = 'time_check_in_deck';
@@ -71,15 +74,11 @@ describe('check-in (placeholder tests)', () => {
     const streakTarget = 5;
 
     // Initialize the vault
-    await initializeVault(
-      program,
-      deckId,
-      {
-        initialDepositAmount,
-        streakTarget,
-        vaultAuthority
-      }
-    );
+    await initializeVault(program, deckId, {
+      initialDepositAmount,
+      streakTarget,
+      vaultAuthority,
+    });
 
     /*
      * NOTE: This test does not actually verify time-based logic.

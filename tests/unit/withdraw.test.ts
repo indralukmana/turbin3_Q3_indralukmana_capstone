@@ -1,8 +1,7 @@
-import {Buffer} from 'node:buffer'
-import { describe, it, expect, assert } from 'vitest';
-import { web3, BN, type Program } from '@coral-xyz/anchor';
-import { setupTest, airdropSol, initializeVault } from '../helpers';
-import { type SrsVault } from '../../target/types/srs_vault';
+import { Buffer } from 'node:buffer';
+import { BN, web3 } from '@coral-xyz/anchor';
+import { assert, describe, it } from 'vitest';
+import { airdropSol, initializeVault, setupTest } from '../helpers';
 
 /*
  * NOTE: These are placeholder tests due to limitations in the current testing framework.
@@ -60,7 +59,7 @@ describe('withdraw (placeholder tests)', () => {
 
     // Attempt to withdraw (should fail because streak target is not met)
     try {
-      const tx = await program.methods
+      const _tx = await program.methods
         .withdraw()
         .accountsPartial({
           user: vaultAuthority.publicKey,

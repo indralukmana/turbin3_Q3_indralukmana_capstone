@@ -17,4 +17,4 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "pnpm run test"
+test = "pnpm exec vitest run --config .configs/vitest.config.ts"

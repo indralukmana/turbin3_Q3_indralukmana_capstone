@@ -1,8 +1,8 @@
-import {Buffer} from 'node:buffer'
-import { describe, it, expect, assert } from 'vitest';
-import { web3, type Program, AnchorProvider, setProvider, workspace, BN } from '@coral-xyz/anchor';
-import { setupTest, airdropSol } from '../helpers';
+import { Buffer } from 'node:buffer';
+import { AnchorProvider, type Program, setProvider, web3, workspace } from '@coral-xyz/anchor';
+import { assert, describe, it } from 'vitest';
 import { type NftMinter } from '../../target/types/nft_minter';
+import { airdropSol } from '../helpers';
 
 describe('nft-minter', () => {
   // Set up the provider and program for the nft-minter program
