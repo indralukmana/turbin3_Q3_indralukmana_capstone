@@ -2,12 +2,13 @@ import {Buffer} from 'node:buffer'
 import { describe, it, expect, assert } from 'vitest';
 import { web3, type Program, AnchorProvider, setProvider, workspace, BN } from '@coral-xyz/anchor';
 import { setupTest, airdropSol } from '../helpers';
+import { type NftMinter } from '../../target/types/nft_minter';
 
 describe('nft-minter', () => {
   // Set up the provider and program for the nft-minter program
   const provider = AnchorProvider.env();
   setProvider(provider);
-  const program = workspace.nft_minter as Program<any>;
+  const program = workspace.nft_minter as Program<NftMinter>;
   const user = web3.Keypair.generate();
 
   it('Has the correct program ID', async () => {
