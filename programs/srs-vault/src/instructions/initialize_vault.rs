@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::state::Vault;
+use crate::state::VaultAccount;
 
 #[derive(Accounts)]
 #[instruction(deck_id: String)]
@@ -11,15 +11,15 @@ pub struct InitializeVault<'info> {
     #[account(
         init,
         payer = vault_authority,
-        space = 8 + Vault::INIT_SPACE,
+        space = 8 + VaultAccount::INIT_SPACE,
         seeds = [b"vault", vault_authority.key().as_ref(), deck_id.as_bytes()],
         bump
     )]
-    pub vault: Account<'info, Vault>,
+    pub vault: Account<'info, VaultAccount>,
 
     pub system_program: Program<'info, System>,
 }
-pub fn initialize_vault(
+pub fn initialize_vault_handler(
     ctx: Context<InitializeVault>,
     deck_id: String,
     initial_deposit_amount: u64,

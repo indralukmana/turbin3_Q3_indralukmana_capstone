@@ -4,7 +4,7 @@ pub const MAX_DECK_ID_LENGTH: usize = 32;
 
 #[account]
 #[derive(InitSpace)]
-pub struct Vault {
+pub struct VaultAccount {
     pub user: Pubkey,
     #[max_len(MAX_DECK_ID_LENGTH)]
     pub deck_id: String,

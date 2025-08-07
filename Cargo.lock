@@ -2626,7 +2626,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "srs_vault"
+name = "srs-vault"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",

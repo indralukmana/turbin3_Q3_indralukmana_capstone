@@ -7,7 +7,7 @@ skip-lint = false
 
 [programs.localnet]
 nft-minter = "CbXhmEqsEVNbC5vuyeTAURW8Ho8TjP4WbXkXimBiyXXA"
-srs_vault = "BzHRkdoBSd48wPBDUE4wXDJn7vgiLmBqBmrFJzsC26ME"
+srs-vault = "7qHxwJLfkiptAyxqYfoWEBsA9oampfGeGDhq3gpURZMn"
 
 [registry]
 url = "https://api.apr.dev"
@@ -17,4 +17,4 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "pnpm exec vitest run --config .configs/vitest.config.ts"
+test = "pnpm exec vitest run --config .configs/vitest.config.ts codama.test.ts"

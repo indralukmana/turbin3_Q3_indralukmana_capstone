@@ -3,7 +3,7 @@ use anchor_lang::system_program;
 use nft_minter::program::NftMinter;
 use nft_minter::state::mint_permit::MintPermit;
 
-use crate::state::Vault;
+use crate::state::VaultAccount;
 
 // Define error codes for withdrawal validation
 #[error_code]
@@ -27,7 +27,7 @@ pub struct Withdraw<'info> {
         has_one = user,
         close = user  // Close the vault account and return rent to user
     )]
-    pub vault: Account<'info, Vault>,
+    pub vault: Account<'info, VaultAccount>,
     
     #[account(mut)]
     pub user_wallet: SystemAccount<'info>,

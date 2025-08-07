@@ -3,7 +3,7 @@
 
 use anchor_lang::prelude::*;
 
-declare_id!("BzHRkdoBSd48wPBDUE4wXDJn7vgiLmBqBmrFJzsC26ME");
+declare_id!("7qHxwJLfkiptAyxqYfoWEBsA9oampfGeGDhq3gpURZMn");
 
 mod instructions;
 mod state;
@@ -14,13 +14,13 @@ use instructions::*;
 pub mod srs_vault {
     use super::*;
 
-    pub fn initialize(
+    pub fn initialize_vault(
         ctx: Context<InitializeVault>,
         deck_id: String,
         initial_deposit_amount: u64,
         streak_target: u8,
     ) -> Result<()> {
-        initialize_vault(ctx, deck_id, initial_deposit_amount, streak_target)
+        initialize_vault_handler(ctx, deck_id, initial_deposit_amount, streak_target)
     }
 
     pub fn check_in(ctx: Context<CheckIn>) -> Result<()> {
