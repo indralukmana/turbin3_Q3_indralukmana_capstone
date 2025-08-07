@@ -28,7 +28,7 @@ Addresses (PDAs) to store user-specific commitment data and temporary mint
 permits. The architecture leverages Solana's `Clock::unix_timestamp` for
 time-based logic and Cross-Program Invocation (CPI) for secure inter-program
 communication to mint NFT credentials. The design emphasizes security,
-simplicity, and testability using Anchor's built-in testing framework.
+simplicity, and testability using modern Solana tooling.
 
 ### 2.2. High Level Overview
 
@@ -103,20 +103,55 @@ graph TD
 
 N/A (Fully On-Chain, Solana Devnet for MVP)
 
-### 3.2. Technology Stack Table
+### 3.2. Technology Stack
 
-| Category         | Technology                          | Version           | Purpose                                   | Rationale                                                                                                                                                                                                |
-| ---------------- | ----------------------------------- | ----------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Language**     | Rust                                | 1.89.0+           | Primary development language for programs | Required by Anchor framework, suitable for Solana's performance needs.                                                                                                                                   |
-| **Framework**    | Anchor                              | 0.31.1            | Solana program framework                  | Standard framework for building secure Solana programs, simplifies PDA/CPI.                                                                                                                              |
-| **SDK**          | Solana Program Library (SPL)        | latest            | Core Solana account types and helpers     | Essential for interacting with native Solana concepts.                                                                                                                                                   |
-| **NFT Standard** | Metaplex (`mpl-token-metadata`)     | 5.1.0             | NFT minting and metadata standard         | The de facto standard for NFTs on Solana, ensures compatibility.                                                                                                                                         |
-| **Testing**      | Anchor's built-in testing framework | latest            | Solana program testing framework          | Provides a robust and straightforward testing environment using the Solana test validator. Time manipulation capabilities are limited compared to litesvm, so time-based logic testing will be deferred. |
-| **Testing**      | `@solana/web3.js`                   | 1.98.4            | Solana JS SDK                             | For interacting with programs and E2E tests.                                                                                                                                                             |
-| **Testing**      | `@coral-xyz/anchor`                 | 0.31.1            | Anchor TS client                          | For simplified interaction with Anchor programs in tests.                                                                                                                                                |
-| **Testing**      | `vitest`                            | 3.2.4             | Test runner                               | For running unit, integration, and E2E tests.                                                                                                                                                            |
-| **Deployment**   | `solana-cli`                        | 2.3.7+            | Deployment and interaction tool           | Standard tool for deploying programs to Solana clusters.                                                                                                                                                 |
-| **Build**        | `cargo` (Rust)                      | Bundled with Rust | Build tool for Rust projects              | Standard Rust build system.                                                                                                                                                                              |
+#### Currently Using (Core Technologies)
+
+- **Language**: Rust 1.89.0+
+  - _Purpose_: Primary development language for Solana programs
+  - _Reason_: Required by Anchor framework, suitable for Solana's performance
+    needs
+
+- **Framework**: Anchor 0.31.1
+  - _Purpose_: Solana program framework
+  - _Reason_: Standard framework for building secure Solana programs, simplifies
+    PDA/CPI
+
+- **SDK**: Solana Program Library (SPL) (latest)
+  - _Purpose_: Core Solana account types and helpers
+  - _Reason_: Essential for interacting with native Solana concepts
+
+- **NFT Standard**: Metaplex (`mpl-token-metadata`) 5.1.0
+  - _Purpose_: NFT minting and metadata standard
+  - _Reason_: The de facto standard for NFTs on Solana, ensures compatibility
+
+- **Testing Framework**: `vitest`
+  - _Purpose_: Modern test runner for JavaScript
+  - _Reason_: Provides type-safe, modern testing experience
+
+- **Solana Client**: `@solana/kit` and `solana-kite`
+  - _Purpose_: Modern Solana client interaction
+  - _Reason_: Provides type-safe, modern developer experience for Solana
+
+- **Deployment**: `solana-cli` 2.2.20
+  - _Purpose_: Deployment and interaction tool
+  - _Reason_: Standard tool for deploying programs to Solana clusters
+
+- **Build**: `cargo` (Rust) (Bundled with Rust)
+  - _Purpose_: Build tool for Rust projects
+  - _Reason_: Standard Rust build system
+
+- **Codama Code Generation**
+  - _Purpose_: Generate TypeScript clients from Anchor IDLs
+  - _Reason_: Provides type-safe instruction creation and account decoding
+  - _Status_: Currently implementing in create-codama-client.ts script
+
+- **(Future) LiteSVM**
+  - _Purpose_: Enhanced time manipulation capabilities for testing
+  - _Reason_: Current testing framework has limited time manipulation, deferring
+    comprehensive time-based logic testing
+  - _Status_: Planned for future implementation to enable full time-based
+    testing
 
 ## Section 4: Data Models
 
@@ -285,10 +320,10 @@ N/A (State is stored in Solana accounts/PDAs, not a traditional database)
 
 ## Section 10: Source Tree
 
-```txt
+````txt
 capstone/
 ├── programs/
-│   ├── vault/
+│   ├── srs_vault/
 │   │   ├── src/
 │   │   │   ├── lib.rs              # Main program entry point and instruction handlers
 │   │   │   ├── state/              # Module for PDA structs (e.g., vault.rs)
@@ -307,15 +342,17 @@ capstone/
 │   │   └── Xargo.toml              # (if needed for custom target)
 │   │
 ├── tests/
-│   ├── unit/                       # Unit tests using litesvm and vitest
+│   ├── unit/                       # Unit tests using vitest with solana-kite
 │   │   ├── initialize.test.ts      # Tests for the initialize instruction
 │   │   ├── check-in.test.ts        # Tests for the check-in instruction
 │   │   └── withdraw.test.ts        # Tests for the withdraw instruction
-│   ├── integration/                # Integration tests using litesvm and vitest
-│   │   └── vault.test.ts           # Integration tests for vault program logic (time travel, check-in windows)
-│   └── e2e/                        # End-to-end tests using solana-web3 and vitest
-│       └── vault.test.ts           # E2E tests for vault program logic
-│   └── helpers.ts                  # Common test helper functions
+│   ├── integration/                # Integration tests using vitest with solana-kite
+│   │   └── vault.test.ts           # Integration tests for vault program logic
+│   └── helpers.ts                  # Common test helper functions using solana-kite
+│
+├── dist/                          # Generated Codama clients
+│   ├── srs_vault/                 # Generated client for srs_vault program
+│   └── nft_minter/                # Generated client for nft_minter program
 │
 ├── client/                         # (Optional) Simple scripts/CLI to interact with programs for MVP demo
 │   └── ...
@@ -325,8 +362,8 @@ capstone/
 │   └── ...
 ├── Cargo.toml                      # Workspace Cargo.toml
 ├── Anchor.toml                     # Anchor workspace configuration
+├── create-codama-client.ts         # Script to generate Codama clients
 └── README.md                       # Project overview
-```
 
 ## Section 11: Infrastructure and Deployment
 
@@ -350,8 +387,8 @@ capstone/
 ### 11.4. Environment Promotion Flow
 
 ```txt
-[Local (litesvm)] --> [Solana Devnet]
-```
+[Local (solana-test-validator)] --> [Solana Devnet]
+````
 
 ### 11.5. Rollback Strategy
 
@@ -413,165 +450,117 @@ capstone/
 
 ### 14.1. Testing Philosophy
 
-- **Approach:** Comprehensive testing pyramid using `litesvm`
-  (TypeScript/vitest) for unit/integration (primary) and
-  `solana-web3.js`/`solana-test-validator` for full end-to-end flow simulation.
+- **Approach:** Comprehensive testing pyramid using `vitest` with modern Solana
+  tooling including `@solana/kit` and `solana-kite` for integration testing, and
+  Codama-generated clients for instruction creation.
 - **Coverage Goals:** >90% line coverage for core instruction logic.
 - **Test Pyramid:**
   - **Unit Tests:** Isolated tests for individual functions and instruction
-    handlers, using `litesvm` and `vitest`. Focus on mocking externalities and
-    testing pure logic.
-  - **Integration Tests:** Tests for interactions between `vault` and
-    `nft-minter` programs, heavily leveraging `litesvm`'s time travel for
-    `check_in` window logic and CPI flows, using `vitest`.
-  - **End-to-End Tests:** Full user journey tests (`stake` -> `check_in`(s) ->
-    `withdraw` -> `mint_credential`) using `vitest` with `@solana/web3.js`
-    against `solana-test-validator` (local) and Devnet (as per NFR12).
+    handlers, using `vitest` with `@solana/kit` and `solana-kite`.
+  - **Integration Tests:** Tests for interactions between programs and complex
+    workflows, using `vitest` with `@solana/kit` and `solana-kite`. These tests
+    cover the full on-chain user journey from initialization to minting.
 
 ### 14.2. Test Types and Organization
 
 #### Unit Tests
 
-- **Framework:** `vitest` with `litesvm`.
+- **Framework:** `vitest` with `@solana/kit` and `solana-kite`.
 - **File Convention:** `*.test.ts` files, located in `tests/unit/`.
 - **Location:** `tests/unit/`.
 - **Test Infrastructure:**
-  - **Simulator:** `litesvm` for fast, isolated testing of individual functions
-    and instruction handlers.
-  - **Deployment:** Programs are built (via `anchor build`) and then loaded into
-    the `litesvm` instance.
-  - **Accounts & Wallets:** `litesvm`'s `airdrop`, `setAccount`, and utility
-    functions are used to set up test scenarios. Test wallets (keypairs) are
-    generated for users and programs.
-  - **Interaction:** Tests use the Anchor TypeScript client
-    (`@coral-xyz/anchor`) to construct and send transactions to the `litesvm`
-    instance, interacting with the deployed programs.
+  - **Simulator:** `solana-test-validator` for realistic testing environment.
+  - **Deployment:** Programs are built (via `anchor build`) and deployed to the
+    test validator.
+  - **Accounts & Wallets:** `solana-kite`'s `createWallets` and utility
+    functions are used to set up test scenarios.
+  - **Interaction:** Tests use Codama-generated TypeScript clients to construct
+    and send instructions, interacting with deployed programs through
+    `solana-kite`'s `sendTransactionFromInstructions` function.
   - **Focus:** Testing individual instructions (`initialize`, `check_in`,
     `withdraw`, `mint_credential`) in isolation, verifying state transitions,
-    error conditions, and basic logic paths with mocked or simple account
-    setups.
+    error conditions, and basic logic paths.
 
 #### Integration Tests
 
-- **Framework:** `vitest` with `litesvm`.
+- **Framework:** `vitest` with `@solana/kit` and `solana-kite`.
 - **File Convention:** `*.test.ts` files.
 - **Location:** `tests/integration/` directory.
 - **Test Infrastructure:**
-  - **Simulator:** `litesvm` for fast, precise time simulation and program
-    interaction testing. This is the primary tool for testing the `vault`
-    check-in windows and the `vault` -> `nft-minter` CPI flow.
-  - **Deployment:** Programs are built (via `anchor build`) and then loaded into
-    the `litesvm` instance. A helper script or function will typically manage
-    this process, reading the program's `.so` file and its IDL.
-  - **Accounts & Wallets:** `litesvm`'s `airdrop`, `setAccount`, and utility
-    functions like `createAssociatedTokenAccount` (if using SPL Tokens) are used
-    to set up test scenarios. Test wallets (keypairs) are generated for users
-    and programs.
-  - **Interaction:** Tests use the Anchor TypeScript client
-    (`@coral-xyz/anchor`) to construct and send transactions to the `litesvm`
-    instance, interacting with the deployed programs.
-  - **Focus:** Testing the interaction between `vault` and `nft-minter`
-    programs, including the CPI for MintPermit creation. Verifying complex
-    workflows and state management across multiple instructions and programs.
-    Heavy use of `litesvm`'s time travel features to test the check-in window
-    logic.
+  - **Environment:** `solana-test-validator` for realistic testing environment.
+  - **Deployment:** Programs are built (via `anchor build`) and deployed to the
+    test validator.
+  - **Accounts & Wallets:** `solana-kite`'s utility functions are used to set up
+    test scenarios.
+  - **Interaction:** Tests use Codama-generated TypeScript clients to construct
+    and send instructions to deployed programs, interacting through
+    `solana-kite`'s connection management.
+  - **Focus:** Testing the interaction between `srs_vault` and `nft-minter`
+    programs, including the CPI for MintPermit creation and complex workflows
+    that cover the full user journey.
 
-**Example `litesvm` Integration Test Snippet (Conceptual):**
+### 14.3. Modern Testing Patterns
+
+#### Using Codama-Generated Clients
+
+All tests should use Codama-generated TypeScript clients for instruction
+creation:
 
 ```typescript
-// tests/integration/vault.test.ts
-import { LiteSVM } from 'litesvm';
-import * as anchor from '@coral-xyz/anchor';
-import { describe, it, beforeAll, beforeEach, expect, vi } from 'vitest';
-// ... other imports
+// Correct approach
+import * as programClient from '../dist/program-name';
+import { connect, type Connection } from 'solana-kite';
+import { type KeyPairSigner } from '@solana/kit';
 
-describe('srs_vault Program Integration Tests', () => {
-  let svm: LiteSVM;
-  let program: anchor.Program<Vault>;
-  let userKeypair: anchor.web3.Keypair;
-  // ... other setup
+// Create instruction using Codama-generated client
+const instruction = await programClient.getInstructionName({
+  // accounts and parameters
+});
 
-  beforeAll(async () => {
-    // 1. Initialize LiteSVM
-    svm = new LiteSVM();
+// Send transaction using solana-kite
+const signature = await connection.sendTransactionFromInstructions({
+  feePayer: alice,
+  instructions: [instruction],
+});
+```
 
-    // 2. Load and deploy the built program
-    // This would involve reading the .so file and IDL, then calling svm.addProgram()
-    // Helper functions are often created for this.
+#### Connection Management with solana-kite
 
-    // 3. Set up Anchor provider to point to LiteSVM
-    const provider = new anchor.AnchorProvider(
-      // Connection is a mock or uses LiteSVM's internal connection
-      svm.createConnection(),
-      new anchor.Wallet(userKeypair), // Use a test wallet
-      anchor.AnchorProvider.defaultOptions(),
-    );
-    anchor.setProvider(provider);
+Use `solana-kite` for simplified connection management:
 
-    // 4. Load the program IDL
-    program = new anchor.Program(IDL, programId, provider);
-  });
+```typescript
+import { connect, type Connection } from 'solana-kite';
+import { type KeyPairSigner } from '@solana/kit';
 
-  beforeEach(async () => {
-    // Reset state or create new accounts for each test if needed
-    userKeypair = anchor.web3.Keypair.generate();
-    await svm.airdrop(userKeypair.publicKey, 1_000_000_000); // Airdrop 1 SOL
-  });
+let connection: Connection;
+let alice: KeyPairSigner;
 
-  it('Performs a valid check-in within the window', async () => {
-    const initialDepositAmount = new anchor.BN(100_000_000); // 0.1 SOL
-    const streakTarget = 5;
-
-    // Initialize to create a Vault PDA
-    await program.methods.initialize(initialDepositAmount, streakTarget)
-      .accounts({...}) // Provide necessary accounts
-      .signers([userKeypair])
-      .rpc();
-
-    // Advance time using LiteSVM (e.g., 22 hours)
-    const currentClock = await svm.getClock();
-    const futureTime = currentClock.unixTimestamp.add(new anchor.BN(22 * 60 * 60));
-    await svm.setClock({ ...currentClock, unixTimestamp: futureTime });
-
-    // Perform check-in
-    const txSig = await program.methods.checkIn()
-      .accounts({...}) // Provide Vault PDA account
-      .signers([userKeypair])
-      .rpc();
-
-    // Assertions: Check account state, transaction success, etc.
-    const vaultAccount = await program.account.vault.fetch(vaultPdaPublicKey);
-    expect(vaultAccount.streakCounter).toBe(2);
-    // ... other assertions
+beforeAll(async () => {
+  connection = connect();
+  [alice] = await connection.createWallets(1, {
+    airdropAmount: lamports(10_000_000_000n),
   });
 });
 ```
 
-#### End-to-End Tests
+#### Wallet Management
 
-- **Framework:** `vitest` with `@solana/web3.js` and `@coral-xyz/anchor`.
-- **File Convention:** `*.test.ts` files.
-- **Location:** `tests/e2e/` directory.
-- **Scope:** Full user journey simulation: `stake` -> `check_in`(s) ->
-  `withdraw` -> `mint_credential`.
-- **Environment:**
-  - Local: `solana-test-validator` spun up, often via `startValidator` helpers
-    or `anchor test`.
-  - Devnet: Direct interaction with the deployed Devnet programs (as per NFR12).
-- **Test Data:** Programmatic setup of initial states, user wallets, and token
-  accounts.
-- **Test Infrastructure:**
-  - **Environment:** Connects to `solana-test-validator` or Devnet RPC endpoint.
-  - **Deployment:** Programs are deployed to the test validator/Devnet cluster.
-  - **Accounts & Wallets:** Real wallet keypairs and account creation on the
-    test cluster.
-  - **Interaction:** Tests use the Anchor TypeScript client
-    (`@coral-xyz/anchor`) to interact with programs deployed on the test
-    cluster.
-  - **Focus:** Validating the complete, integrated flow in a more "real-world"
-    environment, including network interactions, transaction confirmations, and
-    potential RPC nuances. This is especially important for the final validation
-    on Devnet as specified in NFR12.
+Use `solana-kite`'s wallet creation utilities:
+
+```typescript
+// Create multiple wallets with airdrops
+const [alice, bob, charlie] = await connection.createWallets(3, {
+  airdropAmount: lamports(1_000_000_000n),
+});
+```
+
+#### Testing Limitations
+
+**Time-Based Logic Testing**: Comprehensive testing of time-sensitive logic
+(e.g., precise check-in window validation) is deferred due to limitations in
+time manipulation with the current testing framework. Tests focus on verifying
+core logic paths, with precise time window validation to be implemented in a
+future phase.
 
 ## Section 15: Security
 

@@ -10,7 +10,7 @@ project.
 
 ### 1. Manual User Brainstorming
 
-**Output: Preliminary User List**
+Output: Preliminary User List
 
 - **Direct Users:** New Solana Developers, Experienced Software Engineers,
   Hackathon Participants.
@@ -98,7 +98,7 @@ technical requirements for a POC?"
 **AI Prompt:** "Review my trustless user functions and requirements. What's
 missing or unclear? Are the requirements granular enough?"
 
-#### AI Output (Critique)
+### AI Output (Critique)
 
 This is a much stronger, more decentralized model. Key areas to refine:
 
@@ -113,7 +113,7 @@ This is a much stronger, more decentralized model. Key areas to refine:
   the streak? The vault program needs to grant a "mint token" (a specific
   on-chain receipt or PDA) that the NFT program can verify and consume.
 
-#### Documentation of Refinements
+### Documentation of Refinements
 
 The critique is excellent. The on-chain state and the interaction between the
 two programs are critical.
@@ -132,7 +132,7 @@ two programs are critical.
 
 ## Part C: Granularity & Clarity Refinement
 
-#### Part C Refinement Log
+### Part C Refinement Log
 
 - **Story 1:**
   - **Before:** "User initializes a vault with SOL and starts learning."
@@ -155,7 +155,7 @@ two programs are critical.
 begin a study streak.**
 
 - **Potential On-Chain Requirements:**
-  - An `initialize` function that accepts SOL from the user.
+  - An `initialize_vault` function that accepts SOL from the user.
   - Creates a vault PDA seeded with the user's key and deck ID.
   - The PDA must store: `user_pubkey`, `initial_deposit_amount`,
     `start_timestamp`, `streak_target`, `last_check_in_timestamp` (initialized

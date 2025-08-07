@@ -43,10 +43,11 @@ on-chain requirements for the Gamified SRS for Solana Developers project.
 
 - **On-Chain Requirements:** None. This is an off-chain authentication action.
 
-### User Story 2: User approves the transaction to initialize a vault with SOL to begin a study streak
+### User Story 2: User approves transaction to initialize a vault with SOL
 
 - **Potential On-Chain Requirements:**
-  - An `initialize` function on the vault program that accepts a SOL transfer.
+  - An `initialize_vault` function on the vault program that accepts a SOL
+    transfer.
   - It must create a vault PDA (Program Derived Address) seeded with the user's
     public key and a deck identifier.
   - The PDA must store the `user_pubkey`, `initial_deposit_amount`,
@@ -63,7 +64,7 @@ on-chain requirements for the Gamified SRS for Solana Developers project.
   - If the check-in is valid, it updates `last_check_in_timestamp` and
     increments the `streak_counter`.
 
-### User Story 4: After the study streak is complete, the user withdraws their deposited SOL
+### User Story 4: After the study streak is complete, the deposited SOL is withdrawn
 
 - **Potential On-Chain Requirements:**
   - A `withdraw` function on the vault program.
