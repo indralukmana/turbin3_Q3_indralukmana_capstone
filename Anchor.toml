@@ -9,6 +9,11 @@ skip-lint = false
 nft-minter = "CbXhmEqsEVNbC5vuyeTAURW8Ho8TjP4WbXkXimBiyXXA"
 srs-vault = "7qHxwJLfkiptAyxqYfoWEBsA9oampfGeGDhq3gpURZMn"
 
+[programs.devnet]
+nft-minter = "CbXhmEqsEVNbC5vuyeTAURW8Ho8TjP4WbXkXimBiyXXA"
+srs-vault = "7qHxwJLfkiptAyxqYfoWEBsA9oampfGeGDhq3gpURZMn"
+
+
 [registry]
 url = "https://api.apr.dev"
 
