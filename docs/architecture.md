@@ -320,7 +320,7 @@ N/A (State is stored in Solana accounts/PDAs, not a traditional database)
 
 ## Section 10: Source Tree
 
-````txt
+```txt
 capstone/
 ├── programs/
 │   ├── srs-vault/
@@ -364,6 +364,7 @@ capstone/
 ├── Anchor.toml                     # Anchor workspace configuration
 ├── create-codama-client.ts         # Script to generate Codama clients
 └── README.md                       # Project overview
+```
 
 ## Section 11: Infrastructure and Deployment
 
@@ -388,7 +389,7 @@ capstone/
 
 ```txt
 [Local (solana-test-validator)] --> [Solana Devnet]
-````
+```
 
 ### 11.5. Rollback Strategy
 
@@ -556,11 +557,12 @@ const [alice, bob, charlie] = await connection.createWallets(3, {
 
 #### Testing Limitations
 
-**Time-Based Logic Testing**: Comprehensive testing of time-sensitive logic
-(e.g., precise check-in window validation) is deferred due to limitations in
-time manipulation with the current testing framework. Tests focus on verifying
-core logic paths, with precise time window validation to be implemented in a
-future phase.
+**Time-Based Logic Testing**: While the current testing framework has
+limitations in advancing blockchain time, a workaround has been implemented in
+the `check_in.rs` instruction (temporarily reducing the check-in interval to 1
+second) to allow for immediate testing of `TooEarly` conditions and basic
+successful check-ins. Comprehensive testing of longer time windows (e.g.,
+`TooLate` conditions) is deferred.
 
 ## Section 15: Security
 
