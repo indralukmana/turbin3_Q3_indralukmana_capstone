@@ -32,8 +32,10 @@ pub struct CheckIn<'info> {
 
 // Constants for check-in intervals (in seconds)
 // Minimum interval: 20 hours
-const MIN_CHECK_IN_INTERVAL: i64 = 20 * 60 * 60;
-// Maximum interval: 48 hours
+// const MIN_CHECK_IN_INTERVAL: i64 = 20 * 60 * 60;
+
+// For testing purpose the minimum check ini is done in 1 second
+const MIN_CHECK_IN_INTERVAL: i64 = 1;
 const MAX_CHECK_IN_INTERVAL: i64 = 48 * 60 * 60;
 
 // Handler function for the check_in instruction
