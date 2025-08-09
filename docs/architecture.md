@@ -22,7 +22,7 @@ N/A (Custom Anchor programs for Solana)
 ### 2.1. Technical Summary
 
 The system architecture for the "Proof of Discipline" MVP is based on two core
-Solana Anchor programs: `srs_vault` and `nft-minter`. These programs are
+Solana Anchor programs: `srs-vault` and `nft-minter`. These programs are
 designed to be stateless logic handlers that interact with Program Derived
 Addresses (PDAs) to store user-specific commitment data and temporary mint
 permits. The architecture leverages Solana's `Clock::unix_timestamp` for
@@ -36,17 +36,17 @@ simplicity, and testability using modern Solana tooling.
 - **Repository Structure:** Monorepo (as per PRD), with a dedicated directory
   for Anchor programs.
 - **Service Architecture:** Two distinct, loosely coupled Anchor programs
-  (`srs_vault`, `nft-minter`) that communicate via a shared data structure
+  (`srs-vault`, `nft-minter`) that communicate via a shared data structure
   (MintPermit PDA).
-  - **Scope:** Full user journey simulation: `initialize` -> `check_in`(s) ->
-    `withdraw` -> `mint_credential`.
+  - **Scope:** Full user journey simulation: `initialize_vault` -> `check_in`(s)
+    -> `withdraw` -> `mint_credential`.
 
 ### 2.3. High Level Project Diagram
 
 ```mermaid
 graph TD
     subgraph "Solana Blockchain"
-        VaultProgram["srs_vault Program (Anchor)"]
+        VaultProgram["srs-vault Program (Anchor)"]
         NFTMinterProgram["NFT Minter Program (Anchor)"]
 
         subgraph "Program Accounts"
@@ -82,7 +82,7 @@ graph TD
   is a fundamental pattern in Solana program development.
   - _Rationale:_ Solana programs are stateless. PDAs provide a secure,
     deterministic way to create and manage program-owned accounts to store data.
-- **Cross-Program Invocation (CPI):** The `srs_vault` program invokes the
+- **Cross-Program Invocation (CPI):** The `srs-vault` program invokes the
   `nft-minter` program to create the `MintPermit`.
   - _Rationale:_ This enables secure, permissioned interaction between the two
     programs without requiring a separate user transaction, enforcing the rule
@@ -121,7 +121,7 @@ N/A (Fully On-Chain, Solana Devnet for MVP)
   - _Purpose_: Core Solana account types and helpers
   - _Reason_: Essential for interacting with native Solana concepts
 
-- **NFT Standard**: Metaplex (`mpl-token-metadata`) 5.1.0
+- **NFT Standard**: Metaplex
   - _Purpose_: NFT minting and metadata standard
   - _Reason_: The de facto standard for NFTs on Solana, ensures compatibility
 
@@ -180,12 +180,12 @@ Derived Addresses (PDAs) that store state.
 
 **Relationships:**
 
-- Owned by the `srs_vault` program.
-- Consumed and closed by the `srs_vault` program during `withdraw`.
+- Owned by the `srs-vault` program.
+- Consumed and closed by the `srs-vault` program during `withdraw`.
 
 ### 4.2. MintPermit PDA
 
-**Purpose:** A temporary, single-use permit issued by the `srs_vault` program to
+**Purpose:** A temporary, single-use permit issued by the `srs-vault` program to
 authorize the `nft-minter` program to mint an NFT for a user upon successful
 commitment completion.
 
@@ -202,12 +202,12 @@ commitment completion.
 
 - Owned by the `nft-minter` program.
 - Seeded by `user` and `vault` (to ensure uniqueness per user/vault pair).
-- Created by the `srs_vault` program via CPI during `withdraw`.
+- Created by the `srs-vault` program via CPI during `withdraw`.
 - Consumed and closed by the `nft-minter` program during `mint_credential`.
 
 ## Section 5: Components
 
-### 5.1. srs_vault Program
+### 5.1. srs-vault Program
 
 **Responsibility:** Manages the core "Proof of Discipline" logic for staking
 SOL, tracking daily check-ins, and verifying commitment completion. Upon
@@ -245,7 +245,7 @@ credential to a user's wallet, provided they present a valid MintPermit PDA.
 
 **Dependencies:**
 
-- Metaplex `mpl-token-metadata` library.
+- Metaplex library.
 - MintPermit PDA (provided by user as an account).
 
 **Technology Stack:**
@@ -256,7 +256,7 @@ credential to a user's wallet, provided they present a valid MintPermit PDA.
 
 ## Section 6: External APIs
 
-### 6.1. Metaplex `mpl-token-metadata` API
+### 6.1. Metaplex API
 
 - **Purpose:** To create and manage the NFT credential according to the Metaplex
   standard.
@@ -274,7 +274,7 @@ credential to a user's wallet, provided they present a valid MintPermit PDA.
 ```mermaid
 sequenceDiagram
     participant U as User Wallet
-    participant V as srs_vault Program
+    participant V as srs-vault Program
     participant N as NFT Minter Program
     participant SV as Vault PDA
     participant SP as MintPermit PDA
@@ -305,7 +305,7 @@ sequenceDiagram
 
     U->>N: mint_credential()
     N->>SP: Verify MintPermit validity & ownership
-    N->>Metaplex: CPI: Mint NFT (mpl-token-metadata)
+    N->>Metaplex: CPI: Mint NFT
     N->>SP: Close MintPermit PDA
     Note over U,N: Transaction Success (NFT minted)
 ```
@@ -323,7 +323,7 @@ N/A (State is stored in Solana accounts/PDAs, not a traditional database)
 ````txt
 capstone/
 ├── programs/
-│   ├── srs_vault/
+│   ├── srs-vault/
 │   │   ├── src/
 │   │   │   ├── lib.rs              # Main program entry point and instruction handlers
 │   │   │   ├── state/              # Module for PDA structs (e.g., vault.rs)
@@ -351,7 +351,7 @@ capstone/
 │   └── helpers.ts                  # Common test helper functions using solana-kite
 │
 ├── dist/                          # Generated Codama clients
-│   ├── srs_vault/                 # Generated client for srs_vault program
+│   ├── srs-vault/                 # Generated client for srs-vault program
 │   └── nft_minter/                # Generated client for nft_minter program
 │
 ├── client/                         # (Optional) Simple scripts/CLI to interact with programs for MVP demo
@@ -477,7 +477,7 @@ capstone/
   - **Interaction:** Tests use Codama-generated TypeScript clients to construct
     and send instructions, interacting with deployed programs through
     `solana-kite`'s `sendTransactionFromInstructions` function.
-  - **Focus:** Testing individual instructions (`initialize`, `check_in`,
+  - **Focus:** Testing individual instructions (`initialize_vault`, `check_in`,
     `withdraw`, `mint_credential`) in isolation, verifying state transitions,
     error conditions, and basic logic paths.
 
@@ -495,7 +495,7 @@ capstone/
   - **Interaction:** Tests use Codama-generated TypeScript clients to construct
     and send instructions to deployed programs, interacting through
     `solana-kite`'s connection management.
-  - **Focus:** Testing the interaction between `srs_vault` and `nft-minter`
+  - **Focus:** Testing the interaction between `srs-vault` and `nft-minter`
     programs, including the CPI for MintPermit creation and complex workflows
     that cover the full user journey.
 
