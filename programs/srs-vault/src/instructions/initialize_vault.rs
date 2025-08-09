@@ -2,6 +2,17 @@ use anchor_lang::prelude::*;
 
 use crate::state::VaultAccount;
 
+// Define error codes for vault initialization
+#[error_code]
+pub enum InitializeVaultError {
+    #[msg("Invalid deck ID.")]
+    InvalidDeckId,
+    #[msg("Invalid initial deposit amount.")]
+    InvalidInitialDepositAmount,
+    #[msg("Invalid streak target.")]
+    InvalidStreakTarget,
+}
+
 #[derive(Accounts)]
 #[instruction(deck_id: String)]
 pub struct InitializeVault<'info> {
@@ -25,6 +36,18 @@ pub fn initialize_vault_handler(
     initial_deposit_amount: u64,
     streak_target: u8,
 ) -> Result<()> {
+    if deck_id.is_empty() {
+        return err!(InitializeVaultError::InvalidDeckId);
+    }
+
+    if initial_deposit_amount == 0 {
+        return err!(InitializeVaultError::InvalidInitialDepositAmount);
+    }
+
+    if streak_target == 0 {
+        return err!(InitializeVaultError::InvalidStreakTarget);
+    }
+
     // Transfer SOL from user to the vault
     let transfer_instruction = anchor_lang::system_program::Transfer {
         from: ctx.accounts.vault_authority.to_account_info(),
