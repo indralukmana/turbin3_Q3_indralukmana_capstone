@@ -11,6 +11,8 @@ pub enum InitializeVaultError {
     InvalidInitialDepositAmount,
     #[msg("Invalid streak target.")]
     InvalidStreakTarget,
+    #[msg("Insufficient funds.")]
+    InsufficientFunds,
 }
 
 #[derive(Accounts)]
@@ -36,6 +38,11 @@ pub fn initialize_vault_handler(
     initial_deposit_amount: u64,
     streak_target: u8,
 ) -> Result<()> {
+    // balance is insufficient
+    if ctx.accounts.vault_authority.lamports() < initial_deposit_amount {
+        return err!(InitializeVaultError::InsufficientFunds);
+    }
+
     if deck_id.is_empty() {
         return err!(InitializeVaultError::InvalidDeckId);
     }
