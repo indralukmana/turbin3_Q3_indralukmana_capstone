@@ -1,103 +1,168 @@
-import {Buffer} from 'node:buffer'
-import { AnchorProvider, type Program, setProvider, workspace, web3, type BN, type Provider  } from '@coral-xyz/anchor';
-import { type SrsVault } from '../target/types/srs_vault';
+import { Buffer } from 'node:buffer';
+import { type Address, type KeyPairSigner, lamports } from '@solana/kit';
+import { connect, type Connection } from 'solana-kite';
+import {
+  SRS_VAULT_PROGRAM_ADDRESS,
+  getVaultAccountDecoder,
+  getInitializeVaultInstruction,
+  getCheckInInstruction,
+  getWithdrawInstruction,
+  VAULT_ACCOUNT_DISCRIMINATOR,
+} from '../dist/srs_vault';
 
 /**
- * Sets up the Anchor provider and program instance using the built-in testing framework.
- * @returns The program instance.
+ * Sets up the test environment by connecting to the Solana cluster
+ * and creating pre-funded wallets.
+ * @returns An object containing the connection and wallet signers.
  */
-export function setupTest(): Program<SrsVault> {
-  // Configure the client to use the local cluster.
-  const provider = AnchorProvider.env();
-  setProvider(provider);
-
-  // Return the program instance.
-  return workspace.srs_vault as Program<SrsVault>;
+export async function setup() {
+  const connection = connect();
+  const [alice, bob] = await connection.createWallets(2, {
+    airdropAmount: lamports(55_000_000_000n),
+  });
+  return { connection, alice, bob };
 }
 
 /**
- * Airdrops SOL to a specified public key.
- * @param provider The Anchor provider.
- * @param publicKey The public key to airdrop SOL to.
- * @param amount The amount of SOL to airdrop (in lamports).
+ * Derives the Program Derived Address (PDA) for a vault account.
  */
-export async function airdropSol(
-  provider: Provider,
-  publicKey: web3.PublicKey,
-  amount: number,
-): Promise<void> {
-  const tx = await provider.connection.requestAirdrop(publicKey, amount);
-  await provider.connection.confirmTransaction({ signature: tx, ...(await provider.connection.getLatestBlockhash()) });
+export async function getVaultPda({
+  connection,
+  authority,
+  deckId,
+}: {
+  connection: Connection;
+  authority: Address;
+  deckId: string;
+}) {
+  const { pda } = await connection.getPDAAndBump(SRS_VAULT_PROGRAM_ADDRESS, [
+    Buffer.from('vault'),
+    authority,
+    Buffer.from(deckId),
+  ]);
+  return pda;
 }
 
 /**
- * Initializes a vault.
- * @param program The Anchor program instance.
- * @param deckId The deck ID.
- * @param initialDepositAmount The initial deposit amount.
- * @param streakTarget The streak target.
- * @param authority The authority keypair.
- * @returns The vault account.
+ * Fetches and decodes a specific vault account.
  */
-export async function initializeVault(
-  program: Program<SrsVault>,
-  deckId: string,
-  values: {
-    initialDepositAmount: BN,
-    streakTarget: number,
-    vaultAuthority: web3.Keypair,
+export async function getVaultAccount({
+  connection,
+  vaultPda,
+}: {
+  connection: Connection;
+  vaultPda: Address;
+}) {
+  const vaults = await getVaults({ connection });
+
+  for (const vault of vaults) {
+    if (vault.exists && vault.address === vaultPda) {
+      return vault.data;
+    }
   }
-) {
-  const {initialDepositAmount, streakTarget, vaultAuthority} = values
-  const [vaultPda] = web3.PublicKey.findProgramAddressSync(
-    [
-      Buffer.from('vault'),
-      vaultAuthority.publicKey.toBuffer(),
-      Buffer.from(deckId),
-    ],
-    program.programId,
+}
+
+export async function getVaults({ connection }: { connection: Connection }) {
+  const getSrsVaults = connection.getAccountsFactory(
+    SRS_VAULT_PROGRAM_ADDRESS,
+    VAULT_ACCOUNT_DISCRIMINATOR,
+    getVaultAccountDecoder()
   );
 
-  await program.methods
-    .initialize(deckId, initialDepositAmount, streakTarget)
-    .accountsPartial({
-      vaultAuthority: vaultAuthority.publicKey,
-      vault: vaultPda,
-      systemProgram: web3.SystemProgram.programId,
-    })
-    .signers([vaultAuthority])
-    .rpc();
+  const srsVaults = await getSrsVaults();
 
-  return program.account.vault.fetch(vaultPda);
+  return srsVaults;
 }
 
 /**
- * Performs a check-in for a vault.
- * @param program The Anchor program instance.
- * @param vaultAuthority The authority keypair.
- * @param deckId The deck ID.
- * @returns The transaction signature.
+ * High-level wrapper to initialize a vault.
  */
-export async function checkIn(
-  program: Program<SrsVault>,
-  vaultAuthority: web3.Keypair,
-  deckId: string,
-) {
-  const [vaultPda] = web3.PublicKey.findProgramAddressSync(
-    [
-      Buffer.from('vault'),
-      vaultAuthority.publicKey.toBuffer(),
-      Buffer.from(deckId),
-    ],
-    program.programId,
-  );
+export async function initializeVault({
+  connection,
+  feePayer,
+  deckId,
+  initialDepositAmount,
+  streakTarget,
+}: {
+  connection: Connection;
+  feePayer: KeyPairSigner;
+  deckId: string;
+  initialDepositAmount: bigint;
+  streakTarget: number;
+}) {
+  const vaultPda = await getVaultPda({
+    connection,
+    authority: feePayer.address,
+    deckId,
+  });
 
-  return program.methods
-    .checkIn()
-    .accounts({
-      user: vaultAuthority.publicKey,
-      vault: vaultPda,
-    })
-    .signers([vaultAuthority])
-    .rpc();
+  const initializeVaultInstruction = getInitializeVaultInstruction({
+    deckId,
+    initialDepositAmount,
+    streakTarget,
+    vault: vaultPda,
+    vaultAuthority: feePayer,
+  });
+
+  return connection.sendTransactionFromInstructions({
+    feePayer,
+    instructions: [initializeVaultInstruction],
+  });
+}
+
+/**
+ * High-level wrapper to perform a check-in.
+ */
+export async function checkIn({
+  connection,
+  user,
+  deckId,
+}: {
+  connection: Connection;
+  user: KeyPairSigner;
+  deckId: string;
+}) {
+  const vaultPda = await getVaultPda({
+    connection,
+    authority: user.address,
+    deckId,
+  });
+  const checkInInstruction = getCheckInInstruction({
+    user,
+    vault: vaultPda,
+  });
+
+  return connection.sendTransactionFromInstructions({
+    feePayer: user,
+    instructions: [checkInInstruction],
+  });
+}
+
+/**
+ * High-level wrapper to withdraw from a vault.
+ */
+export async function withdraw({
+  connection,
+  user,
+  deckId,
+}: {
+  connection: Connection;
+  user: KeyPairSigner;
+  deckId: string;
+}) {
+  const vaultPda = await getVaultPda({
+    connection,
+    authority: user.address,
+    deckId,
+  });
+  const withdrawInstruction = getWithdrawInstruction({
+    user,
+    vault: vaultPda,
+    userWallet: user.address,
+  });
+
+  return connection.sendTransactionFromInstructions({
+    feePayer: user,
+    instructions: [withdrawInstruction],
+  });
 }

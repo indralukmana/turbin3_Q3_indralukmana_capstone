@@ -1,57 +1,36 @@
-import { Buffer } from 'node:buffer';
-import { AnchorProvider, type Program, setProvider, web3, workspace } from '@coral-xyz/anchor';
-import { assert, describe, it } from 'vitest';
-import { type NftMinter } from '../../target/types/nft_minter';
-import { airdropSol } from '../helpers';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { type Connection } from 'solana-kite';
+import { generateKeyPair, type KeyPairSigner } from '@solana/kit';
+import { setup } from '../helpers';
+import { getMintCredentialInstruction } from '../../dist/nft_minter';
 
-describe('nft-minter', () => {
-  // Set up the provider and program for the nft-minter program
-  const provider = AnchorProvider.env();
-  setProvider(provider);
-  const program = workspace.nft_minter as Program<NftMinter>;
-  const user = web3.Keypair.generate();
+describe('NFT Minter', () => {
+  let connection: Connection;
+  let alice: KeyPairSigner;
 
-  it('Has the correct program ID', async () => {
-    // Verify that the program ID is correctly set
-    assert.ok(program.programId, 'Program ID should be defined');
-    console.log('NFT Minter Program ID:', program.programId.toString());
-  });
+  beforeAll(async () => {
+    const setupResult = await setup();
+    connection = setupResult.connection;
+    alice = setupResult.alice;
+  }, 20_000);
 
-  it('Has the create_mint_permit instruction', async () => {
-    // Verify that the create_mint_permit instruction exists
-    assert.ok(program.methods.createMintPermit, 'createMintPermit instruction should exist');
-  });
+  it('should FAIL to mint when the MintPermit account is uninitialized', async () => {
+    const uninitializedPermit = await generateKeyPair();
+    const asset = await generateKeyPair();
+    const collection = await generateKeyPair();
 
-  it('Has the mint_credential instruction', async () => {
-    // Verify that the mint_credential instruction exists
-    assert.ok(program.methods.mintCredential, 'mintCredential instruction should exist');
-  });
+    const mintCredentialInstruction = getMintCredentialInstruction({
+      mintPermit: uninitializedPermit.publicKey,
+      user: alice,
+      asset,
+      collection,
+    });
 
-  it('Can create a mint permit (placeholder)', async () => {
-    // Airdrop SOL to the user to pay for transactions
-    await airdropSol(provider, user.publicKey, 10 * web3.LAMPORTS_PER_SOL);
-
-    const deckId = 'test_deck';
-    
-    // Get the mint permit PDA
-    const [mintPermitPda] = web3.PublicKey.findProgramAddressSync(
-      [
-        Buffer.from('mint_permit'),
-        user.publicKey.toBuffer(),
-        Buffer.from(deckId),
-      ],
-      program.programId,
-    );
-
-    try {
-      // Try to create a mint permit
-      // Note: This is a simplified test that doesn't fully test the CPI functionality
-      // A complete test would require setting up the vault program and performing a withdrawal
-      console.log('Mint permit PDA:', mintPermitPda.toString());
-      assert.ok(true, 'Mint permit creation test completed');
-    } catch (error) {
-      console.error('Error creating mint permit:', error);
-      assert.fail('Failed to create mint permit');
-    }
+    await expect(
+      connection.sendTransactionFromInstructions({
+        feePayer: alice,
+        instructions: [mintCredentialInstruction],
+      })
+    ).rejects.toThrow();
   });
 });

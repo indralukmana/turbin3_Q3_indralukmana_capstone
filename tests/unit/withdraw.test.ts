@@ -1,146 +1,119 @@
-import { Buffer } from 'node:buffer';
-import { BN, web3 } from '@coral-xyz/anchor';
-import { assert, describe, it } from 'vitest';
-import { airdropSol, initializeVault, setupTest } from '../helpers';
+/* eslint-disable no-await-in-loop */
+import { beforeAll, describe, expect, it } from 'vitest';
+import { type Connection } from 'solana-kite';
+import { type KeyPairSigner } from '@solana/kit';
+import {
+  setup,
+  initializeVault,
+  checkIn,
+  withdraw,
+  getVaultAccount,
+  getVaultPda,
+} from '../helpers';
 
-/*
- * NOTE: These are placeholder tests due to limitations in the current testing framework.
- * The Anchor testing framework with `vitest` does not support the complex scenarios
- * required for comprehensive testing of the withdrawal logic.
- *
- * These tests only verify that:
- * 1. The withdraw instruction exists and can be called
- * 2. The basic error handling works (e.g., rejecting withdrawals when streak target is not met)
- *
- * COMPREHENSIVE TESTING WILL BE IMPLEMENTED IN A FUTURE PHASE
- * WHEN A TESTING FRAMEWORK WITH ADVANCED CAPABILITIES IS AVAILABLE.
- *
- * REAL TESTS SHOULD VERIFY:
- * - Successful withdrawal when streak target is met
- * - Rejection of withdrawal when streak target is not met
- * - Proper transfer of SOL from vault to user wallet
- * - Proper closing of vault account
- * - CPI interaction with nft-minter program
- */
+const STREAK_TARGET_NOT_MET_ERROR = 'custom program error: #6000';
 
-describe('withdraw (placeholder tests)', () => {
-  const program = setupTest();
-  const vaultAuthority = web3.Keypair.generate();
+// Helper to pause execution
+const sleep = async (ms: number) =>
+  // eslint-disable-next-line no-promise-executor-return
+  new Promise((resolve) => setTimeout(resolve, ms));
 
-  it('Rejects withdrawal when streak target is not met', async () => {
-    // Airdrop SOL to the vault authority to pay for transactions
-    await airdropSol(program.provider, vaultAuthority.publicKey, 10 * web3.LAMPORTS_PER_SOL);
+describe('Vault Withdrawal', () => {
+  let connection: Connection;
+  let alice: KeyPairSigner;
+  let bob: KeyPairSigner;
 
-    // Define test parameters
-    const deckId = 'withdraw_deck';
-    const initialDepositAmount = new BN(2 * web3.LAMPORTS_PER_SOL);
-    const streakTarget = 5; // Set a high streak target that won't be met
+  beforeAll(async () => {
+    const setupResult = await setup();
+    connection = setupResult.connection;
+    alice = setupResult.alice;
+    bob = setupResult.bob;
+  }, 20_000);
 
-    // Initialize the vault
-    await initializeVault(
-      program,
+  it('should allow a successful withdrawal after the streak target is met', async () => {
+    const deckId = 'successful_withdrawal_deck';
+    const streakTarget = 3;
+
+    await initializeVault({
+      connection,
+      feePayer: alice,
       deckId,
-      {
-        initialDepositAmount,
-        streakTarget,
-        vaultAuthority
-      }
-    );
+      initialDepositAmount: 1_000_000_000n,
+      streakTarget,
+    });
 
-    // Get the vault PDA
-    const [vaultPda] = web3.PublicKey.findProgramAddressSync(
-      [
-        Buffer.from('vault'),
-        vaultAuthority.publicKey.toBuffer(),
-        Buffer.from(deckId),
-      ],
-      program.programId,
-    );
-
-    // Attempt to withdraw (should fail because streak target is not met)
-    try {
-      const _tx = await program.methods
-        .withdraw()
-        .accountsPartial({
-          user: vaultAuthority.publicKey,
-          vault: vaultPda,
-          userWallet: vaultAuthority.publicKey,
-          systemProgram: web3.SystemProgram.programId,
-        })
-        .signers([vaultAuthority])
-        .rpc();
-      
-      // If we reach this point, the test should fail
-      assert.fail('Expected withdrawal to fail with "StreakTargetNotMet" error');
-    } catch {
-      // Verify that we got the expected error
-      // Note: With the current testing framework, we can't easily check the specific error code
-      // This test will pass if any error is thrown
-      assert.ok(true, 'Expected an error to be thrown for withdrawal when streak target is not met');
+    for (let i = 0; i < streakTarget - 1; i++) {
+      await sleep(1500);
+      await checkIn({ connection, user: alice, deckId });
     }
+
+    const vaultPda = await getVaultPda({
+      connection,
+      authority: alice.address,
+      deckId,
+    });
+    const initialBalance = await connection.rpc
+      .getBalance(alice.address)
+      .send();
+
+    await withdraw({
+      connection,
+      user: alice,
+      deckId,
+    });
+
+    const finalBalance = await connection.rpc.getBalance(alice.address).send();
+    const vaultAccount = await getVaultAccount({ connection, vaultPda });
+
+    expect(vaultAccount).toBeUndefined(); // Account should be closed
+    expect(finalBalance.value).toBeGreaterThan(initialBalance.value); // User should receive lamports back
   });
 
-  it('Attempts withdrawal (comprehensive testing deferred)', async () => {
-    // Airdrop SOL to the vault authority to pay for transactions
-    await airdropSol(program.provider, vaultAuthority.publicKey, 10 * web3.LAMPORTS_PER_SOL);
-
-    // Define test parameters
-    const deckId = 'withdraw_deck_2';
-    const initialDepositAmount = new BN(2 * web3.LAMPORTS_PER_SOL);
-    const streakTarget = 1; // Set streak target to 1 for easier testing
-
-    // Initialize the vault
-    await initializeVault(
-      program,
+  it('should FAIL with a StreakTargetNotMet error if withdrawal is attempted early', async () => {
+    const deckId = 'early_withdrawal_deck';
+    await initializeVault({
+      connection,
+      feePayer: alice,
       deckId,
-      {
-        initialDepositAmount,
-        streakTarget,
-        vaultAuthority
-      }
-    );
+      initialDepositAmount: 1_000_000_000n,
+      streakTarget: 5,
+    });
 
-    // Get the vault PDA
-    const [vaultPda] = web3.PublicKey.findProgramAddressSync(
-      [
-        Buffer.from('vault'),
-        vaultAuthority.publicKey.toBuffer(),
-        Buffer.from(deckId),
-      ],
-      program.programId,
-    );
+    await expect(
+      withdraw({
+        connection,
+        user: alice,
+        deckId,
+      })
+    ).rejects.toThrow(STREAK_TARGET_NOT_MET_ERROR);
+  });
 
-    /*
-     * NOTE: This test does not actually verify the complete withdrawal logic.
-     * With the current testing framework, we cannot:
-     * 1. Simulate meeting the streak target
-     * 2. Verify proper SOL transfer from vault to user wallet
-     * 3. Verify proper closing of vault account
-     * 4. Test CPI interaction with nft-minter program
-     *
-     * This test simply verifies that the instruction exists and can be called.
-     * Comprehensive testing will be implemented in a future phase.
-     */
-    try {
-      const tx = await program.methods
-        .withdraw()
-        .accountsPartial({
-          user: vaultAuthority.publicKey,
-          vault: vaultPda,
-          userWallet: vaultAuthority.publicKey,
-          systemProgram: web3.SystemProgram.programId,
-        })
-        .signers([vaultAuthority])
-        .rpc();
-      
-      // Log the transaction signature for debugging
-      console.log('Withdraw transaction signature', tx);
-      
-      // If no error is thrown, that's fine for this placeholder test
-    } catch {
-      // If an error is thrown, that's also fine for this placeholder test
-      // We're just verifying the instruction exists and can be called
-      assert.ok(true);
-    }
+  it('should FAIL when an unauthorized user attempts to withdraw', async () => {
+    const deckId = 'unauthorized_withdrawal_deck';
+    await initializeVault({
+      connection,
+      feePayer: alice,
+      deckId,
+      initialDepositAmount: 1_000_000_000n,
+      streakTarget: 2,
+    });
+
+    await sleep(1500);
+    await checkIn({ connection, user: alice, deckId });
+
+    // Attempt withdrawal with Bob on Alice's vault
+    await expect(
+      withdraw({
+        connection,
+        user: bob,
+        deckId,
+      })
+    ).rejects.toThrow();
+  });
+
+  it.skip('[placeholder] should FAIL if the streak was broken by a TooLate event', () => {
+    // This test is skipped because we cannot manipulate the blockchain's clock
+    // to simulate the passage of time required to trigger the TooLate error.
+    expect(true).toBe(true);
   });
 });
