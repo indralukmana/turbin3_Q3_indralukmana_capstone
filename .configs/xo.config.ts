@@ -1,13 +1,13 @@
 import type { FlatXoConfig } from 'xo';
-import unusedImports from "eslint-plugin-unused-imports";
+import unusedImports from 'eslint-plugin-unused-imports';
 
 const config = [
   {
     prettier: 'compat',
     space: true,
     ignores: ['./target/**/*.*'],
-     plugins: {
-        "unused-imports": unusedImports,
+    plugins: {
+      'unused-imports': unusedImports,
     },
     rules: {
       'unicorn/no-array-reduce': 'off',
@@ -17,16 +17,23 @@ const config = [
       'no-implicit-coercion': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
-      "unused-imports/no-unused-imports": "error",
-        "unused-imports/no-unused-vars": [
-            "warn",
-            {
-                "vars": "all",
-                "varsIgnorePattern": "^_",
-                "args": "after-used",
-                "argsIgnorePattern": "^_",
-            },
-        ]
+      '@typescript-eslint/naming-convention': [
+        'error',
+        {
+          selector: 'variable',
+          format: ['camelCase', 'UPPER_CASE'],
+        },
+      ],
+      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-vars': [
+        'warn',
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+        },
+      ],
     },
   },
 ] satisfies FlatXoConfig;
