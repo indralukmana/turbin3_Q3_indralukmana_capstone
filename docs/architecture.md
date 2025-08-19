@@ -121,9 +121,10 @@ N/A (Fully On-Chain, Solana Devnet for MVP)
   - _Purpose_: Core Solana account types and helpers
   - _Reason_: Essential for interacting with native Solana concepts
 
-- **NFT Standard**: Metaplex
-  - _Purpose_: NFT minting and metadata standard
-  - _Reason_: The de facto standard for NFTs on Solana, ensures compatibility
+- **NFT Standard**: Metaplex Core
+  - _Purpose_: Modern NFT minting and metadata standard from Metaplex
+  - _Reason_: The new standard for NFTs on Solana, offering more flexibility and
+    efficiency. The `nft-minter` program uses `mpl-core` version `0.8.1`.
 
 - **Testing Framework**: `vitest`
   - _Purpose_: Modern test runner for JavaScript
@@ -185,24 +186,24 @@ Derived Addresses (PDAs) that store state.
 
 ### 4.2. MintPermit PDA
 
-**Purpose:** A temporary, single-use permit issued by the `srs-vault` program to
-authorize the `nft-minter` program to mint an NFT for a user upon successful
-commitment completion.
+**Purpose:** A temporary, single-use permit, initialized by the user and
+populated by the `srs-vault` program, to authorize the `nft-minter` program to
+mint an NFT upon successful commitment completion.
 
 **Key Attributes:**
 
 - `user`: `Pubkey` - The public key of the user authorized to mint.
-- `vault`: `Pubkey` - The public key of the Vault PDA from which this permit
-  originated.
 - `deck_id`: `String` - Identifier for the learning deck associated with the
   commitment.
-- `created_at`: `i64` - The Unix timestamp when the permit was created.
+- `creation_timestamp`: `i64` - The Unix timestamp when the permit was populated
+  by the `srs-vault` program.
 
 **Relationships:**
 
 - Owned by the `nft-minter` program.
-- Seeded by `user` and `vault` (to ensure uniqueness per user/vault pair).
-- Created by the `srs-vault` program via CPI during `withdraw`.
+- Seeded by `user` and `deck_id` (to ensure uniqueness per user/deck pair).
+- Initialized by the user's client before calling `withdraw`.
+- Populated by the `srs-vault` program via CPI during `withdraw`.
 - Consumed and closed by the `nft-minter` program during `mint_credential`.
 
 ## Section 5: Components
@@ -211,63 +212,75 @@ commitment completion.
 
 **Responsibility:** Manages the core "Proof of Discipline" logic for staking
 SOL, tracking daily check-ins, and verifying commitment completion. Upon
-successful completion, it issues a MintPermit via CPI.
+successful completion, it populates a pre-initialized MintPermit via CPI.
 
 **Key Interfaces:**
 
-- `initialize(deck_id: String, initial_deposit_amount: u64, streak_target: u8)` -
-  Initializes a new Vault PDA, seeded by the `user`'s public key and the
-  `deck_id`, and transfers SOL.
-- `check_in()` - Verifies time window and updates streak.
-- `withdraw()` - Verifies streak completion, transfers SOL back, closes Vault
-  PDA, and performs CPI to `nft-minter` to create MintPermit.
+```markdown
+- `initialize_vault(deck_id: String, initial_deposit_amount: u64, streak_target: u8)`  
+  Initializes
+  a new Vault PDA, seeded by the `user`'s public key and the `deck_id`, and
+  transfers SOL.
+- `check_in()`  
+  Verifies time window and updates streak.
+- `withdraw()`  
+  Verifies streak completion, transfers SOL back, closes Vault PDA, and performs
+  a CPI to the `nft-minter` program to populate the `MintPermit`.
+```
 
 **Dependencies:**
 
 - Solana Clock sysvar (for `unix_timestamp`).
-- `nft-minter` program (for CPI to create MintPermit).
+- `nft-minter` program (for CPI to populate the MintPermit).
 
 **Technology Stack:**
 
-- Rust, Anchor 0.29.0.
+- Rust, Anchor 0.31.1.
 - Uses `#[account]` constraints for secure PDA management.
 - Uses `CpiContext` for calling the `nft-minter` program.
 
 ### 5.2. NFT Minter Program
 
 **Responsibility:** A permissionless program that mints a verifiable NFT
-credential to a user's wallet, provided they present a valid MintPermit PDA.
+credential to a user's wallet. It has a client-facing instruction to initialize
+a permit and a CPI-only instruction to populate it.
 
 **Key Interfaces:**
 
-- `mint_credential()` - Verifies the MintPermit PDA, uses Metaplex libraries to
-  mint the NFT, and closes the MintPermit PDA.
+- `initialize_mint_permit(deck_id: String)` - A client-side instruction that
+  creates and initializes the `MintPermit` PDA with the user as the payer. This
+  must be called before `withdraw` is called on the `srs-vault`.
+- `create_mint_permit(deck_id: String)` - A CPI-only instruction, called by the
+  `srs-vault` program, to populate the initialized `MintPermit` with a creation
+  timestamp.
+- `mint_credential(deck_id: String)` - Verifies the `MintPermit` PDA, uses
+  Metaplex Core libraries to mint the NFT, and closes the `MintPermit` PDA.
 
 **Dependencies:**
 
-- Metaplex library.
+- Metaplex Core library.
 - MintPermit PDA (provided by user as an account).
 
 **Technology Stack:**
 
-- Rust, Anchor 0.29.0.
+- Rust, Anchor 0.31.1.
 - Uses `#[account]` constraints for MintPermit verification.
-- Integrates with Metaplex SDK for NFT operations.
+- Integrates with the `mpl-core` library for NFT operations.
 
 ## Section 6: External APIs
 
-### 6.1. Metaplex API
+### 6.1. Metaplex Core API
 
-- **Purpose:** To create and manage the NFT credential according to the Metaplex
-  standard.
-- **Documentation:** <https://docs.metaplex.com/>
+- **Purpose:** To create and manage the NFT credential according to the modern
+  Metaplex Core standard.
+- **Documentation:** <https://docs.metaplex.com/programs/core>
 - **Base URL(s):** N/A (On-chain program library)
 - **Authentication:** N/A (On-chain interaction)
 - **Rate Limits:** N/A (On-chain, subject to compute budget)
-- **Integration Notes:** The `nft-minter` program will link against this library
-  and use its instructions for creating and minting NFT credentials within its
-  own `mint_credential` instruction. Must consult the latest Metaplex
-  documentation for the current, recommended instructions and APIs.
+- **Integration Notes:** The `nft-minter` program links against the `mpl-core`
+  library and uses its CPIs for creating and minting NFT credentials within its
+  own `mint_credential` instruction. This provides a more flexible and efficient
+  alternative to the older Token Metadata standard.
 
 ## Section 7: Core Workflows
 
@@ -280,9 +293,9 @@ sequenceDiagram
     participant SP as MintPermit PDA
     participant S as Solana Clock
 
-    U->>V: initialize(initial_deposit_amount, streak_target)
+    U->>V: initialize_vault(initial_deposit_amount, streak_target)
     V->>SV: Create & Initialize PDA
-    V->>SV: Receive SOL from User
+    V->>U: Receive SOL from User
     Note over U,V: Transaction Success
 
     Note over U,V: Time Passes (Daily Check-ins)
@@ -295,17 +308,23 @@ sequenceDiagram
         Note over U,V: Transaction Success
     end
 
+    Note over U,N: User initiates withdrawal process
+
+    U->>N: initialize_mint_permit(deck_id)
+    N->>SP: Create & Initialize MintPermit PDA
+    Note over U,N: MintPermit PDA is now ready
+
     U->>V: withdraw()
     V->>SV: Verify streak_counter >= streak_target
     V->>U: Transfer SOL from Vault PDA to User
     V->>SV: Close Vault PDA
-    V->>N: CPI: create_mint_permit()
-    N->>SP: Create & Initialize MintPermit PDA
+    V->>N: CPI: create_mint_permit(deck_id)
+    N->>SP: Populate MintPermit PDA with timestamp
     Note over V,N: CPI Success
 
-    U->>N: mint_credential()
+    U->>N: mint_credential(deck_id)
     N->>SP: Verify MintPermit validity & ownership
-    N->>Metaplex: CPI: Mint NFT
+    N->>Metaplex: CPI: Mint NFT (mpl-core)
     N->>SP: Close MintPermit PDA
     Note over U,N: Transaction Success (NFT minted)
 ```
@@ -327,28 +346,27 @@ capstone/
 │   │   ├── src/
 │   │   │   ├── lib.rs              # Main program entry point and instruction handlers
 │   │   │   ├── state/              # Module for PDA structs (e.g., vault.rs)
-│   │   │   ├── instructions/       # Module for instruction logic (e.g., initialize.rs, check_in.rs, withdraw.rs)
-│   │   │   └── errors.rs           # Program-specific error definitions
-│   │   ├── Cargo.toml              # Rust dependencies for vault program
-│   │   └── Xargo.toml              # (if needed for custom target)
+│   │   │   ├── instructions/       # Module for instruction logic (e.g., initialize_vault.rs, check_in.rs, withdraw.rs)
+│   │   │   └── ...
+│   │   └── ...
 │   │
 │   ├── nft-minter/
 │   │   ├── src/
 │   │   │   ├── lib.rs              # Main program entry point and instruction handlers
 │   │   │   ├── state/              # Module for PDA structs (e.g., mint_permit.rs)
-│   │   │   ├── instructions/       # Module for instruction logic (e.g., mint_credential.rs)
-│   │   │   └── errors.rs           # Program-specific error definitions
-│   │   ├── Cargo.toml              # Rust dependencies for nft-minter program
-│   │   └── Xargo.toml              # (if needed for custom target)
+│   │   │   ├── instructions/       # Module for instruction logic (e.g., initialize_mint_permit.rs, create_mint_permit.rs, mint_credential.rs)
+│   │   │   └── ...
+│   │   └── ...
 │   │
 ├── tests/
-│   ├── unit/                       # Unit tests using vitest with solana-kite
+│   ├── unit/                       # Unit tests using vitest
 │   │   ├── initialize.test.ts      # Tests for the initialize instruction
 │   │   ├── check-in.test.ts        # Tests for the check-in instruction
-│   │   └── withdraw.test.ts        # Tests for the withdraw instruction
-│   ├── integration/                # Integration tests using vitest with solana-kite
-│   │   └── vault.test.ts           # Integration tests for vault program logic
-│   └── helpers.ts                  # Common test helper functions using solana-kite
+│   │   ├── withdraw.test.ts        # Tests for the withdraw instruction
+│   │   └── nft-minter.test.ts      # Tests for the nft-minter instructions
+│   ├── integration/                # Integration tests using vitest
+│   │   └── srs-vault.test.ts       # Full lifecycle integration test
+│   └── helpers.ts                  # Common test helper functions
 │
 ├── dist/                          # Generated Codama clients
 │   ├── srs-vault/                 # Generated client for srs-vault program

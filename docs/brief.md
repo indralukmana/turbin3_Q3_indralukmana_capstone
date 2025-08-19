@@ -157,9 +157,9 @@ self-custody and decentralization.
 Successfully deliver production-grade `srs-vault` and `nft-minter` Anchor
 programs, complete with exhaustive tests and professional documentation, within
 the 2-week timeframe. A clear demonstration script must validate the end-to-end
-flow: Initialize Vault -> Check-in(s) -> Withdraw SOL -> Mint NFT. Success is
-measured by the technical excellence and completeness of this core on-chain
-component.
+flow: Initialize Vault -> Check-in(s) -> Withdraw SOL (triggering a CPI to the
+NFT program) -> Mint NFT. Success is measured by the technical excellence and
+completeness of this core on-chain component.
 
 **Testing Approach Update:** The testing strategy will utilize modern Solana
 tooling including `vitest` with `@solana/kit` and `solana-kite` for integration
