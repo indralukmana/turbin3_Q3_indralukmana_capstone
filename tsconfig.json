@@ -9,7 +9,8 @@
     "strictNullChecks": true,
     "moduleResolution": "bundler",
     "incremental": true, // Enable incremental compilation for faster builds
-    "tsBuildInfoFile": "./.cache/.tsbuildinfo"
+    "tsBuildInfoFile": "./.cache/.tsbuildinfo",
+    "skipLibCheck": true
   },
   "include": ["**/*.ts", ".configs/vitest.config.ts"],
   "exclude": ["node_modules", "dist", "build"]

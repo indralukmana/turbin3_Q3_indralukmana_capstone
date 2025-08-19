@@ -3,7 +3,7 @@
   "license": "ISC",
   "scripts": {
     "fix": "pnpm format && pnpm lint:fix && pnpm lint:md",
-    "format": "prettier --config .configs/prettier.config.ts --write .",
+    "format": "prettier --config .configs/prettier.config.js --ignore-path .configs/.prettierignore --write .",
     "lint": "xo --config .configs/xo.config.ts .",
     "lint:fix": "pnpm lint --fix",
     "lint:md": "markdownlint-cli2 --fix --config .configs/.markdownlint.jsonc \"**/*.md\" \"**/*.mdx\"",

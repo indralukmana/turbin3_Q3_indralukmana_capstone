@@ -8,7 +8,7 @@
   "emmet.showExpandedAbbreviation": "never",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit",
+    "source.fixAll": "explicit"
   },
   "prettier.configPath": ".configs/prettier.config.js", // prettier ext does not support ts
   "markdownlint.configFile": ".configs/.markdownlint.jsonc"
