@@ -114,8 +114,8 @@ anchor build
 
 The programs have been deployed to Solana's devnet.
 
-- **`nft_minter` Program ID:** `GgsbB7i8ruSheL5A5FkDf6upCbNgaXFURDiRdVtg2X6G`
-- **`srs_vault` Program ID:** `7qHxwJLfkiptAyxqYfoWEBsA9oampfGeGDhq3gpURZMn`
+- **`srs_vault` Program ID:** `BFuf7XCHjRwX8Y8i7ZGu9NarbhAzLVMV1GykooSF67Aq`
+- **`nft_minter` Program ID:** `6NHGoEbEbq4ePyCsSHVr6rViFzL3EJ2DpMdfngpPkwKa`
 
 ## 🧪 Running Tests
 
