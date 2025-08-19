@@ -4,9 +4,9 @@
   "scripts": {
     "fix": "pnpm format && pnpm lint:fix && pnpm lint:md",
     "format": "prettier --config .configs/prettier.config.js --ignore-path .configs/.prettierignore --write .",
-    "lint": "xo --config .configs/xo.config.ts .",
+    "lint": "xo --config .configs/xo.config.ts",
     "lint:fix": "pnpm lint --fix",
-    "lint:md": "markdownlint-cli2 --fix --config .configs/.markdownlint.jsonc \"**/*.md\" \"**/*.mdx\"",
+    "lint:md": "markdownlint-cli2 --fix --config .configs/.markdownlint.jsonc",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "validate": "pnpm typecheck && pnpm lint ",
     "regenerate-client": "anchor build && pnpx tsx create-codama-client.ts",
