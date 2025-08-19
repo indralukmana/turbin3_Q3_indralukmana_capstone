@@ -74,13 +74,13 @@ describe('NFT Minter', () => {
   it('should FAIL to mint when the MintPermit account is uninitialized', async () => {
     const uninitializedPermit = await generateKeyPair();
     const asset = await generateKeyPair();
-    const collection = await generateKeyPair();
+    const deckId = 'uninitialized_deck';
 
     const mintCredentialInstruction = getMintCredentialInstruction({
       mintPermit: uninitializedPermit.publicKey,
       user: alice,
       asset,
-      collection,
+      deckId,
     });
 
     await expect(

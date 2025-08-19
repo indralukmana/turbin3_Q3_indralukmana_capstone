@@ -7,6 +7,7 @@ import {
   getMintPermitDecoder,
   getInitializeMintPermitInstruction,
   getCreateMintPermitInstruction,
+  getMintCredentialInstruction,
 } from '../dist/nft_minter';
 import {
   SRS_VAULT_PROGRAM_ADDRESS,
@@ -306,4 +307,41 @@ export async function getMintPermitAccount({
       return mintPermit.data;
     }
   }
+}
+
+/**
+ * High-level wrapper to mint a credential.
+ */
+export async function mintCredential({
+  connection,
+  user,
+  deckId,
+}: {
+  connection: Connection;
+  user: KeyPairSigner;
+  deckId: string;
+}) {
+  const { pda: asset } = await connection.getPDAAndBump(
+    NFT_MINTER_PROGRAM_ADDRESS,
+    [Buffer.from('asset'), user.address, Buffer.from(deckId)]
+  );
+
+  const mintPermitPda = await getMintPermitPda({
+    connection,
+    user: user.address,
+    deckId,
+  });
+
+  const mintCredentialInstruction = getMintCredentialInstruction({
+    mintPermit: mintPermitPda,
+    user,
+    asset,
+    deckId,
+  });
+  const signature = await connection.sendTransactionFromInstructions({
+    feePayer: user,
+    instructions: [mintCredentialInstruction],
+  });
+
+  return { asset, signature };
 }

@@ -129,7 +129,7 @@ describe('Vault Withdrawal', () => {
     ).rejects.toThrow();
   });
 
-  it('[placeholder] should FAIL if the streak was broken by a TooLate event', () => {
+  it.skip('[placeholder] should FAIL if the streak was broken by a TooLate event', () => {
     // This test is skipped because we cannot manipulate the blockchain's clock
     // to simulate the passage of time required to trigger the TooLate error.
     expect(true).toBe(true);

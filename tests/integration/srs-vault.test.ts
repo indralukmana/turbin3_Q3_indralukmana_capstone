@@ -9,6 +9,9 @@ import {
   withdraw,
   getVaultAccount,
   getVaultPda,
+  getMintPermitAccount,
+  getMintPermitPda,
+  mintCredential,
 } from '../helpers';
 
 // Helper to pause execution
@@ -25,7 +28,7 @@ describe('SRS Vault Integration', () => {
     alice = setupResult.alice;
   }, 20_000);
 
-  it.skip('[placeholder] should handle the full lifecycle: initialize -> check-in -> withdraw -> mint', async () => {
+  it('should handle the full lifecycle: initialize -> check-in -> withdraw -> mint', async () => {
     const deckId = 'full_lifecycle_deck';
     const streakTarget = 2;
 
@@ -59,28 +62,28 @@ describe('SRS Vault Integration', () => {
     const vaultAccount = await getVaultAccount({ connection, vaultPda });
     expect(vaultAccount).toBeUndefined();
 
-    // 5. Verify MintPermit was created and is now closed (or check for NFT mint)
-    // In a real scenario, we would query for the NFT. For this test, we check if the permit account is closed.
-    // const mintPermitAccountInfo =
-    //   await connection.rpc.getAccountInfo(mintPermit);
-    // Depending on program logic, the permit might be closed immediately after minting.
-    // If so, this check is valid. If not, we'd check its data.
-    // expect(mintPermitAccountInfo).toBeNull();
+    // 5. Mint the credential
+    const { asset, signature } = await mintCredential({
+      connection,
+      user: alice,
+      deckId,
+    });
 
-    // Further tests would involve a full NFT client to verify the minted NFT's metadata.
-  });
+    console.log('asset:', asset);
+    console.log('signature:', signature);
 
-  it.skip('[placeholder] should fail to reuse a mint permit', async () => {
-    // This would be part of a more complex test where we try to call the nft-minter
-    // program again with the same closed permit account.
-    // For now, this is a conceptual placeholder.
-    expect(true).toBe(true);
-  });
+    // 6. Verify MintPermit is closed
+    const mintPermitPda = await getMintPermitPda({
+      connection,
+      user: alice.address,
+      deckId,
+    });
 
-  it.skip('[placeholder] should rollback transaction if CPI to nft-minter fails', async () => {
-    // This test is complex and requires mocking the CPI call to fail.
-    // This is beyond the scope of this unit test and would be handled in
-    // a more advanced integration testing environment.
-    expect(true).toBe(true);
-  });
+    const mintPermitAccount = await getMintPermitAccount({
+      connection,
+      mintPermitPda,
+    });
+
+    expect(mintPermitAccount).toBeUndefined();
+  }, 60_000);
 });

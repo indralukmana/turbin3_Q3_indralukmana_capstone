@@ -25,7 +25,7 @@ pub mod nft_minter {
         create_mint_permit_handler(ctx, deck_id)
     }
 
-    pub fn mint_credential(ctx: Context<MintCredential>) -> Result<()> {
-        mint_credential_handler(ctx)
+    pub fn mint_credential(ctx: Context<MintCredential>, deck_id: String) -> Result<()> {
+        mint_credential_handler(ctx, deck_id)
     }
 }
