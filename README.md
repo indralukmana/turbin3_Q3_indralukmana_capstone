@@ -66,22 +66,22 @@ The core of this project is built around two Solana Anchor programs:
   - Tracks a user's daily "check-in" streak using on-chain timestamps.
   - Enforces the rules of the commitment (e.g., daily check-in window).
   - Upon successful completion of the streak, returns the user's SOL.
-  - Issues a secure, single-use "Mint Permit" via a Cross-Program Invocation
-    (CPI) to the `nft-minter` program.
+  - Populates a pre-initialized "Mint Permit" via a Cross-Program Invocation
+    (CPI) to the `nft-minter` program, authorizing the mint.
 
 - **`nft-minter` Program:**
-  - A permissionless program that mints a verifiable NFT credential.
-  - Requires a valid "Mint Permit" from the `srs-vault` program to authorize the
-    mint.
+  - A permissionless program that mints a verifiable NFT credential using
+    Metaplex Core.
+  - Requires a valid, populated "Mint Permit" to authorize the mint.
   - Consumes the permit after minting to ensure it cannot be reused.
   - The NFT metadata reflects the details of the user's achievement (e.g.,
     streak length, completion date).
 
 ## 🛠️ Tech Stack
 
-- **Language**: Rust 1.89.0+
+- **Language**: Rust
 - **Framework**: Anchor 0.31.1
-- **NFT Standard**: Metaplex
+- **NFT Standard**: Metaplex Core
 - **Testing**: `vitest` with `@solana/kit` and `solana-kite`
 - **Client Generation**: Codama for type-safe TypeScript clients from Anchor
   IDLs.
@@ -124,3 +124,19 @@ To run the tests, run the following command:
 ```sh
 pnpm test
 ```
+
+### Testing Limitations
+
+Our current test suite, built with `vitest` and `solana-test-validator`,
+comprehensively covers program logic, state transitions, and error conditions.
+However, it does not support the direct manipulation of the blockchain's clock.
+
+This presents a limitation for exhaustively testing time-sensitive logic, such
+as the 48-hour `TooLate` check-in condition. While we have tested the `TooEarly`
+condition with a short interval, fully validating longer time-based rules is
+deferred.
+
+**Future Work:** We plan to integrate **LiteSVM**, a lightweight,
+high-performance Solana runtime, into our testing workflow. LiteSVM will provide
+the necessary tools to manipulate the clock, allowing us to simulate the passage
+of time and write comprehensive tests for all time-based scenarios.
