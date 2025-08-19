@@ -2,6 +2,13 @@ import { Buffer } from 'node:buffer';
 import { type Address, type KeyPairSigner, lamports } from '@solana/kit';
 import { connect, type Connection } from 'solana-kite';
 import {
+  MINT_PERMIT_DISCRIMINATOR,
+  NFT_MINTER_PROGRAM_ADDRESS,
+  getMintPermitDecoder,
+  getInitializeMintPermitInstruction,
+  getCreateMintPermitInstruction,
+} from '../dist/nft_minter';
+import {
   SRS_VAULT_PROGRAM_ADDRESS,
   getVaultAccountDecoder,
   getInitializeVaultInstruction,
@@ -38,6 +45,26 @@ export async function getVaultPda({
   const { pda } = await connection.getPDAAndBump(SRS_VAULT_PROGRAM_ADDRESS, [
     Buffer.from('vault'),
     authority,
+    Buffer.from(deckId),
+  ]);
+  return pda;
+}
+
+/**
+ * Derives the Program Derived Address (PDA) for a mint permit.
+ */
+export async function getMintPermitPda({
+  connection,
+  user,
+  deckId,
+}: {
+  connection: Connection;
+  user: Address;
+  deckId: string;
+}) {
+  const { pda } = await connection.getPDAAndBump(NFT_MINTER_PROGRAM_ADDRESS, [
+    Buffer.from('mint_permit'),
+    user,
     Buffer.from(deckId),
   ]);
   return pda;
@@ -139,6 +166,67 @@ export async function checkIn({
 }
 
 /**
+ * High-level wrapper to initialize a mint permit.
+ */
+export async function initializeMintPermit({
+  connection,
+  user,
+  deckId,
+}: {
+  connection: Connection;
+  user: KeyPairSigner;
+  deckId: string;
+}) {
+  const mintPermitPda = await getMintPermitPda({
+    connection,
+    user: user.address,
+    deckId,
+  });
+
+  const initializeMintPermitInstruction = getInitializeMintPermitInstruction({
+    deckId,
+    mintPermit: mintPermitPda,
+    payer: user,
+    user: user.address,
+  });
+
+  return connection.sendTransactionFromInstructions({
+    feePayer: user,
+    instructions: [initializeMintPermitInstruction],
+  });
+}
+
+/**
+ * High-level wrapper to create a mint permit.
+ */
+export async function createMintPermit({
+  connection,
+  user,
+  deckId,
+}: {
+  connection: Connection;
+  user: KeyPairSigner;
+  deckId: string;
+}) {
+  const mintPermitPda = await getMintPermitPda({
+    connection,
+    user: user.address,
+    deckId,
+  });
+
+  const createMintPermitInstruction = getCreateMintPermitInstruction({
+    deckId,
+    mintPermit: mintPermitPda,
+    user,
+  });
+
+  return connection.sendTransactionFromInstructions({
+    feePayer: user,
+    instructions: [createMintPermitInstruction],
+  });
+}
+
+/**
  * High-level wrapper to withdraw from a vault.
  */
 export async function withdraw({
@@ -155,14 +243,67 @@ export async function withdraw({
     authority: user.address,
     deckId,
   });
+
+  const mintPermitPda = await getMintPermitPda({
+    connection,
+    user: user.address,
+    deckId,
+  });
+
+  const initializeMintPermitInstruction = getInitializeMintPermitInstruction({
+    deckId,
+    mintPermit: mintPermitPda,
+    payer: user,
+    user: user.address,
+  });
+
   const withdrawInstruction = getWithdrawInstruction({
     user,
     vault: vaultPda,
-    userWallet: user.address,
+    mintPermit: mintPermitPda,
+    nftMinterProgram: NFT_MINTER_PROGRAM_ADDRESS,
   });
 
   return connection.sendTransactionFromInstructions({
     feePayer: user,
-    instructions: [withdrawInstruction],
+    instructions: [initializeMintPermitInstruction, withdrawInstruction],
   });
+}
+
+/**
+ * Fetches mint permits
+ */
+export async function getMintPermits({
+  connection,
+}: {
+  connection: Connection;
+}) {
+  const getMintPermitAccounts = connection.getAccountsFactory(
+    NFT_MINTER_PROGRAM_ADDRESS,
+    MINT_PERMIT_DISCRIMINATOR,
+    getMintPermitDecoder()
+  );
+
+  const mintPermits = await getMintPermitAccounts();
+
+  return mintPermits;
+}
+
+/**
+ * Fetches and decodes a specific mint permit account.
+ */
+export async function getMintPermitAccount({
+  connection,
+  mintPermitPda,
+}: {
+  connection: Connection;
+  mintPermitPda: Address;
+}) {
+  const mintPermits = await getMintPermits({ connection });
+
+  for (const mintPermit of mintPermits) {
+    if (mintPermit.exists && mintPermit.address === mintPermitPda) {
+      return mintPermit.data;
+    }
+  }
 }

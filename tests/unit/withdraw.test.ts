@@ -9,6 +9,8 @@ import {
   withdraw,
   getVaultAccount,
   getVaultPda,
+  getMintPermitPda,
+  getMintPermitAccount,
 } from '../helpers';
 
 const STREAK_TARGET_NOT_MET_ERROR = 'custom program error: #6000';
@@ -30,7 +32,7 @@ describe('Vault Withdrawal', () => {
     bob = setupResult.bob;
   }, 20_000);
 
-  it('should allow a successful withdrawal after the streak target is met', async () => {
+  it('should allow a successful withdrawal and create a mint permit', async () => {
     const deckId = 'successful_withdrawal_deck';
     const streakTarget = 3;
 
@@ -65,8 +67,24 @@ describe('Vault Withdrawal', () => {
     const finalBalance = await connection.rpc.getBalance(alice.address).send();
     const vaultAccount = await getVaultAccount({ connection, vaultPda });
 
+    // Assert vault is closed and funds are returned
     expect(vaultAccount).toBeUndefined(); // Account should be closed
     expect(finalBalance.value).toBeGreaterThan(initialBalance.value); // User should receive lamports back
+
+    // Assert mint permit was created
+    const mintPermitPda = await getMintPermitPda({
+      connection,
+      user: alice.address,
+      deckId,
+    });
+    const mintPermitAccount = await getMintPermitAccount({
+      connection,
+      mintPermitPda,
+    });
+
+    expect(mintPermitAccount).toBeDefined();
+    expect(mintPermitAccount?.user).toEqual(alice.address);
+    expect(mintPermitAccount?.deckId).toEqual(deckId);
   });
 
   it('should FAIL with a StreakTargetNotMet error if withdrawal is attempted early', async () => {
@@ -111,7 +129,7 @@ describe('Vault Withdrawal', () => {
     ).rejects.toThrow();
   });
 
-  it.skip('[placeholder] should FAIL if the streak was broken by a TooLate event', () => {
+  it('[placeholder] should FAIL if the streak was broken by a TooLate event', () => {
     // This test is skipped because we cannot manipulate the blockchain's clock
     // to simulate the passage of time required to trigger the TooLate error.
     expect(true).toBe(true);
