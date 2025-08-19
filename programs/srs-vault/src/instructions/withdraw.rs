@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use nft_minter::{cpi::create_mint_permit, program::NftMinter};
 
 use crate::state::VaultAccount;
 
@@ -26,10 +27,11 @@ pub struct Withdraw<'info> {
     )]
     pub vault: Account<'info, VaultAccount>,
 
+    /// CHECK: This is the account that will be created by the CPI call.
     #[account(mut)]
-    pub user_wallet: SystemAccount<'info>,
+    pub mint_permit: AccountInfo<'info>,
 
-    pub system_program: Program<'info, System>,
+    pub nft_minter_program: Program<'info, NftMinter>,
 }
 
 // Handler function for the withdraw instruction
@@ -41,19 +43,17 @@ pub fn withdraw_handler(ctx: Context<Withdraw>) -> Result<()> {
         return err!(WithdrawError::StreakTargetNotMet);
     }
 
-    // Transfer the initial deposit amount from the vault to the user's wallet
-    let transfer_amount = vault.get_lamports();
-
-    **ctx
-        .accounts
-        .vault
-        .to_account_info()
-        .try_borrow_mut_lamports()? -= transfer_amount;
-    **ctx
-        .accounts
-        .user_wallet
-        .to_account_info()
-        .try_borrow_mut_lamports()? += transfer_amount;
+    // Do CPI call to nft_minter program
+    create_mint_permit(
+        CpiContext::new(
+            ctx.accounts.nft_minter_program.to_account_info(),
+            nft_minter::cpi::accounts::CreateMintPermit {
+                mint_permit: ctx.accounts.mint_permit.to_account_info(),
+                user: ctx.accounts.user.to_account_info(),
+            },
+        ),
+        vault.deck_id.clone(),
+    )?;
 
     Ok(())
 }

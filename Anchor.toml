@@ -6,12 +6,12 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-nft-minter = "CbXhmEqsEVNbC5vuyeTAURW8Ho8TjP4WbXkXimBiyXXA"
-srs-vault = "7qHxwJLfkiptAyxqYfoWEBsA9oampfGeGDhq3gpURZMn"
+nft_minter = "GgsbB7i8ruSheL5A5FkDf6upCbNgaXFURDiRdVtg2X6G"
+srs_vault = "7qHxwJLfkiptAyxqYfoWEBsA9oampfGeGDhq3gpURZMn"
 
 [programs.devnet]
-nft-minter = "CbXhmEqsEVNbC5vuyeTAURW8Ho8TjP4WbXkXimBiyXXA"
-srs-vault = "7qHxwJLfkiptAyxqYfoWEBsA9oampfGeGDhq3gpURZMn"
+nft_minter = "GgsbB7i8ruSheL5A5FkDf6upCbNgaXFURDiRdVtg2X6G"
+srs_vault = "7qHxwJLfkiptAyxqYfoWEBsA9oampfGeGDhq3gpURZMn"
 
 
 [registry]
