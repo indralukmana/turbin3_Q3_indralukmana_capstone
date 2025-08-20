@@ -96,8 +96,6 @@ export async function getVaultAccount({
 
   const vaultAccount = getVaultAccountDecoder().decode(valueBytes);
 
-  console.log({ vaultAccount });
-
   return vaultAccount;
 }
 
@@ -311,13 +309,17 @@ export async function getMintPermitAccount({
   connection: Connection;
   mintPermitPda: Address;
 }) {
-  const mintPermits = await getMintPermits({ connection });
+  const { value } = await connection.rpc.getAccountInfo(mintPermitPda).send();
 
-  for (const mintPermit of mintPermits) {
-    if (mintPermit.exists && mintPermit.address === mintPermitPda) {
-      return mintPermit.data;
-    }
+  if (!value?.data) {
+    return;
   }
+
+  const valueBytes = getBase58Encoder().encode(value.data);
+
+  const mintPermitAccount = getMintPermitDecoder().decode(valueBytes);
+
+  return mintPermitAccount;
 }
 
 /**
