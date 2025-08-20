@@ -1,5 +1,10 @@
 import { Buffer } from 'node:buffer';
-import { type Address, type KeyPairSigner, lamports } from '@solana/kit';
+import {
+  type Address,
+  getBase58Encoder,
+  type KeyPairSigner,
+  lamports,
+} from '@solana/kit';
 import { connect, type Connection } from 'solana-kite';
 import {
   MINT_PERMIT_DISCRIMINATOR,
@@ -81,13 +86,19 @@ export async function getVaultAccount({
   connection: Connection;
   vaultPda: Address;
 }) {
-  const vaults = await getVaults({ connection });
+  const { value } = await connection.rpc.getAccountInfo(vaultPda).send();
 
-  for (const vault of vaults) {
-    if (vault.exists && vault.address === vaultPda) {
-      return vault.data;
-    }
+  if (!value?.data) {
+    return;
   }
+
+  const valueBytes = getBase58Encoder().encode(value.data);
+
+  const vaultAccount = getVaultAccountDecoder().decode(valueBytes);
+
+  console.log({ vaultAccount });
+
+  return vaultAccount;
 }
 
 export async function getVaults({ connection }: { connection: Connection }) {
