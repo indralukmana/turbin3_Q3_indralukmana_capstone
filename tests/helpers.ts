@@ -4,6 +4,7 @@ import {
   getBase58Encoder,
   type KeyPairSigner,
   lamports,
+  type ReadonlyUint8Array,
 } from '@solana/kit';
 import { connect, type Connection } from 'solana-kite';
 import {
@@ -34,6 +35,28 @@ export async function setup() {
     airdropAmount: lamports(55_000_000_000n),
   });
   return { connection, alice, bob };
+}
+
+/**
+ * Helper to fetch and decode an account's data.
+ */
+export async function fetchAndDecodeAccountInfo<T>({
+  address,
+  connection,
+  decode,
+}: {
+  address: Address;
+  decode: (bytes: ReadonlyUint8Array) => T;
+  connection: Connection;
+}): Promise<T | undefined> {
+  const { value } = await connection.rpc.getAccountInfo(address).send();
+
+  if (!value?.data) {
+    return;
+  }
+
+  const bytes = getBase58Encoder().encode(value.data);
+  return decode(bytes);
 }
 
 /**
@@ -86,15 +109,11 @@ export async function getVaultAccount({
   connection: Connection;
   vaultPda: Address;
 }) {
-  const { value } = await connection.rpc.getAccountInfo(vaultPda).send();
-
-  if (!value?.data) {
-    return;
-  }
-
-  const valueBytes = getBase58Encoder().encode(value.data);
-
-  const vaultAccount = getVaultAccountDecoder().decode(valueBytes);
+  const vaultAccount = await fetchAndDecodeAccountInfo({
+    address: vaultPda,
+    decode: getVaultAccountDecoder().decode,
+    connection,
+  });
 
   return vaultAccount;
 }
@@ -309,15 +328,11 @@ export async function getMintPermitAccount({
   connection: Connection;
   mintPermitPda: Address;
 }) {
-  const { value } = await connection.rpc.getAccountInfo(mintPermitPda).send();
-
-  if (!value?.data) {
-    return;
-  }
-
-  const valueBytes = getBase58Encoder().encode(value.data);
-
-  const mintPermitAccount = getMintPermitDecoder().decode(valueBytes);
+  const mintPermitAccount = await fetchAndDecodeAccountInfo({
+    address: mintPermitPda,
+    decode: getMintPermitDecoder().decode,
+    connection,
+  });
 
   return mintPermitAccount;
 }
